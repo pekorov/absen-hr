@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Absen</title>
+<style>
+:root{--bg:#F3F5F9;--card:#fff;--ink:#12203A;--mute:#5E6B82;--line:#E1E6EF;--blue:#2B59FF;--red:#E5484D;--green:#14804A;--amber:#A35F00}
+@media(prefers-color-scheme:dark){:root{--bg:#0D1526;--card:#16213A;--ink:#EDF1FA;--mute:#98A5BF;--line:#26324E;--blue:#6C8BFF;--red:#FF6B70;--green:#43C98A;--amber:#F0B04A}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,'Segoe UI',sans-serif}
+.app{max-width:480px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 16px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:14px}
+h1{font-size:22px;margin:0 0 4px}.sub{color:var(--mute);font-size:13px}
+input{width:100%;font:inherit;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);margin-top:10px}
+.btn{width:100%;margin-top:12px;border:0;border-radius:10px;background:var(--blue);color:#fff;font:inherit;font-weight:700;padding:13px;cursor:pointer}
+.go{display:block;margin:18px auto 8px;width:160px;height:160px;border-radius:50%;border:0;background:var(--blue);color:#fff;font:inherit;font-weight:800;font-size:19px;cursor:pointer}
+.go.out{background:var(--red)}.go:disabled{background:var(--mute)}
+.c{text-align:center}.msg{min-height:22px;color:var(--mute);text-align:center}.msg.ok{color:var(--green)}.msg.bad{color:var(--amber)}
+.row{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)}.row:first-of-type{border-top:0}
+a{color:var(--blue);cursor:pointer}
+.locb{margin-top:12px;padding:12px;border:1px solid var(--amber);border-radius:12px;color:var(--amber);font-size:13.5px;text-align:left}.locb[hidden]{display:none}.locb .btn{width:auto;padding:9px 14px}
+#stk{display:block;margin:10px auto 0;width:150px;max-width:60%;height:auto}#stk[hidden]{display:none}
+#cm{position:fixed;inset:0;background:#000;z-index:9;display:flex;flex-direction:column}#cm[hidden]{display:none}
+#vid{flex:1;min-height:0;width:100%;object-fit:cover;transform:scaleX(-1)}
+.cbar{display:flex;gap:12px;padding:16px 16px max(16px,env(safe-area-inset-bottom))}.cbar .btn{flex:1}
+</style></head><body><div class="app">
+<div id="login" class="card" hidden>
+  <h1>Absen</h1><div class="sub">Sign in with your name and 4-digit PIN from your manager.</div>
+  <input id="n" placeholder="Your name" autocomplete="name"><input id="p" placeholder="PIN" inputmode="numeric" maxlength="4" type="password">
+  <button class="btn" id="in">Sign in</button><div class="msg bad" id="lm"></div>
+</div>
+<div id="main" hidden>
+  <div class="card c"><h1 id="hi"></h1><div class="sub" id="shift"></div>
+    <div class="locb" id="locb" hidden><div id="loct"></div><button class="btn" id="lock" style="margin-top:8px">Turn on location</button></div>
+    <button class="go" id="go"></button><div class="msg" id="msg"></div><img id="stk" hidden alt="">
+    <div id="cm" hidden><video id="vid" autoplay playsinline muted></video><div class="cbar"><button class="btn" id="cc" style="margin:0">Cancel</button><button class="btn" id="snap" style="margin:0">Take photo</button></div></div>
+    <div class="sub">A selfie is taken when you clock in. Your location is checked at clock-in and clock-out.</div></div>
+  <div class="card"><b>Your next 7 days</b><div id="week"></div></div>
+  <div class="c sub"><a id="so">Sign out</a></div>
+</div>
+</div>
+<script>
+const $=s=>document.querySelector(s),L=localStorage;
+const slug=n=>n.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const hdr=()=>({'content-type':'application/json','x-user':L.getItem('u')||'','x-pin':L.getItem('p')||''});
+const WHY={outside_office:'you were outside the office area',low_accuracy:'GPS was not accurate',impossible_travel:'location jumped too far',no_location:'location was blocked',no_selfie:'no selfie was taken',no_shift_today:'no shift is scheduled today'};
+const fmt=d=>new Date(d+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+let locErr='';
+function getPos(){
+  return new Promise(res=>{
+    if(!navigator.geolocation){locErr='unsupported';return res(null)}
+    const go=(hi,next)=>navigator.geolocation.getCurrentPosition(p=>{locErr='';res(p.coords)},e=>{
+      if(e.code===1){locErr='denied';res(null)}
+      else if(next)next();
+      else{locErr=e.code===3?'timeout':'unavailable';res(null)}
+    },{enableHighAccuracy:hi,timeout:10000,maximumAge:0});
+    go(true,()=>go(false,null));
+  });
+}
+const TIP={denied:'Allow location for this site. iPhone: Settings > Privacy & Security > Location Services > Safari Websites > While Using the App. Android: tap the lock icon next to the address > Permissions. Then reload the page.',timeout:'Move near a window or outdoors, make sure Location Services is on, and try again.',unavailable:'Make sure Location Services is on, then try again. If you opened this link inside WhatsApp or another app, open it in Safari or Chrome instead.',unsupported:'This browser cannot share location. Open the link in Safari or Chrome.'};
+let open=false,asked=false;
+async function askLoc(){
+  const c=await getPos();
+  $('#locb').hidden=!!c;
+  if(!c)$('#loct').textContent='Location is off, so you cannot clock in or out yet. '+TIP[locErr||'unavailable'];
+  return c;
+}
+async function load(){
+  const r=await fetch('/api/me',{headers:hdr()});
+  if(!r.ok){$('#main').hidden=true;$('#login').hidden=false;return false}
+  const m=await r.json();$('#login').hidden=true;$('#main').hidden=false;open=m.open;
+  $('#hi').textContent='Hi, '+m.name.split(' ')[0];
+  const t=m.week[0];$('#shift').textContent=t.code&&t.code!=='OFF'?`Today: ${t.code} shift, ${t.start}–${t.end}`:'No shift today';$('#shift').textContent+=' · '+(m.place||'');
+  const done=m.today&&m.today.out&&!m.open;
+  const k=done?'thank_u':m.open?'kopi':'',st=$('#stk');st.hidden=!k;if(k){st.src='/img/'+k+'.webp';st.alt=k==='kopi'?'Hemm... kopi dulu?':'Terima kasih'}
+  $('#go').textContent=done?'Done':m.open?'Clock out':'Clock in';$('#go').disabled=!!done;$('#go').className='go'+(m.open?' out':'');
+  $('#week').innerHTML=m.week.map(d=>`<div class="row"><span>${fmt(d.date)}</span><b>${d.code&&d.code!=='OFF'?`${d.code} · ${d.start}–${d.end}`:(d.code||'Not set')}</b></div>`).join('');
+  if(!asked){asked=true;askLoc()}
+  return true;
+}
+$('#in').onclick=async()=>{L.setItem('u',slug($('#n').value));L.setItem('p',$('#p').value.trim());if(!await load())$('#lm').textContent='Wrong name or PIN.'};
+$('#so').onclick=()=>{L.clear();location.reload()};
+$('#go').onclick=async()=>{
+  $('#go').disabled=true;$('#msg').className='msg';$('#msg').textContent='Checking location…';
+  const c=await askLoc();
+  if(!c){$('#go').disabled=false;$('#msg').className='msg bad';$('#msg').textContent='Location not detected, so you cannot clock '+(open?'out':'in')+'.';return}
+  const w=await fetch('/api/where',{method:'POST',headers:hdr(),body:JSON.stringify({type:open?'out':'in',lat:c.latitude,lng:c.longitude,accuracy:c.accuracy})}).then(r=>r.json()).catch(()=>({}));
+  if(w.error){$('#go').disabled=false;$('#msg').className='msg bad';$('#msg').textContent=w.error;return}
+  if(open)return doClock(null,c);
+  $('#msg').textContent='';
+  const p=await selfie();
+  if(p==='denied'){$('#go').disabled=false;$('#msg').className='msg bad';$('#msg').textContent='The camera is needed to clock in. Allow camera access in your browser settings.';return}
+  if(p)doClock(p,c);else $('#go').disabled=false;
+};
+async function selfie(){
+  let st;
+  try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:720},height:{ideal:720}},audio:false})}catch(e){return 'denied'}
+  const v=$('#vid');v.srcObject=st;$('#cm').hidden=false;
+  return new Promise(res=>{
+    const done=r=>{st.getTracks().forEach(t=>t.stop());v.srcObject=null;$('#cm').hidden=true;res(r)};
+    $('#cc').onclick=()=>done(null);
+    $('#snap').onclick=()=>{
+      if(!v.videoWidth)return;
+      const s=400/Math.max(v.videoWidth,v.videoHeight),c=document.createElement('canvas');
+      c.width=Math.round(v.videoWidth*s);c.height=Math.round(v.videoHeight*s);
+      c.getContext('2d').drawImage(v,0,0,c.width,c.height);
+      done(c.toDataURL('image/jpeg',.7));
+    };
+  });
+}
+async function doClock(f,c){
+  $('#go').disabled=true;$('#msg').className='msg';$('#msg').textContent='Saving…';
+  const photo=f;
+  const r=await fetch('/api/clock',{method:'POST',headers:hdr(),body:JSON.stringify({type:open?'out':'in',lat:c&&c.latitude,lng:c&&c.longitude,accuracy:c&&c.accuracy,photo})});
+  const j=await r.json();
+  if(!r.ok){$('#msg').className='msg bad';$('#msg').textContent=j.error}
+  else if(j.status==='review'){$('#msg').className='msg bad';$('#msg').textContent='Recorded. Your manager will review it because '+j.reasons.map(x=>WHY[x]||x).join(', ')+'.'}
+  else{$('#msg').className='msg ok';$('#msg').textContent=j.late>0?`Recorded. You are ${j.late} min late.`:'Recorded. Thank you!'}
+  await load();
+}
+$('#lock').onclick=askLoc;
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!$('#main').hidden)askLoc()});
+load();
+</script></body></html>
