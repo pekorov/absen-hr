@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Absen admin</title>
+<link rel="icon" type="image/png" href="/img/favicon.png"><link rel="apple-touch-icon" href="/img/favicon.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#F3F5F9;--card:#fff;--ink:#12203A;--mute:#5E6B82;--line:#E1E6EF;--blue:#2B59FF;--red:#E5484D;--green:#14804A;--amber:#A35F00}
+@media(prefers-color-scheme:dark){:root{--bg:#0D1526;--card:#16213A;--ink:#EDF1FA;--mute:#98A5BF;--line:#26324E;--blue:#6C8BFF;--red:#FF6B70;--green:#43C98A;--amber:#F0B04A}}
+.logo{display:block;aspect-ratio:723/270;background:var(--ink);-webkit-mask:url(/img/kurogi.png) center/contain no-repeat;mask:url(/img/kurogi.png) center/contain no-repeat}
+.brand{display:flex;align-items:center;gap:16px;margin-bottom:14px}.brand .logo{width:104px;flex:none}.brand h1{margin:0}
+#sv{position:fixed;inset:0;background:rgba(18,32,58,.72);z-index:60;overflow:auto;padding:max(16px,env(safe-area-inset-top)) 12px 28px}#sv[hidden]{display:none}.sv-in{max-width:680px;margin:0 auto}
+.ps-paper{background:#fff;color:#1D1D1B;border-radius:14px;padding:30px 28px 24px}.ps-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding-bottom:18px;border-bottom:2px solid #1D1D1B}.ps-top img{height:40px;display:block}
+.ps-ttl{text-align:right}.ps-ttl b{display:block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5E6B82}.ps-ttl span{font-size:19px;font-weight:700}.ps-ttl em{display:block;color:#E5484D;font-size:12px;font-weight:700;font-style:normal}
+.ps-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;margin:18px 0}.ps-meta small,.ps-row small{display:block;color:#5E6B82;font-size:12px}.ps-meta b{font-weight:700}
+.ps-paper h4{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5E6B82;margin:20px 0 4px}.ps-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #E1E6EF}.ps-row span:last-child{white-space:nowrap}
+.ps-net{display:flex;justify-content:space-between;align-items:baseline;margin-top:20px;padding:15px 18px;background:#1D1D1B;color:#fff;border-radius:12px}.ps-net span{font-size:13px;letter-spacing:.1em;text-transform:uppercase}.ps-net b{font-size:24px}.ps-foot{margin-top:14px;color:#5E6B82;font-size:12.5px}
+.ps-act{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.ps-help{color:#E9ECF2;margin-top:10px}
+@media print{body>.app,#lb{display:none!important}#sv{position:static;background:#fff;padding:0;overflow:visible}.ps-act,.ps-help{display:none}.ps-paper{border-radius:0;padding:0}.ps-net{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,'Segoe UI',sans-serif}
+.app{max-width:820px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 16px 40px}
+h1{font-size:22px;margin:0 0 12px}h2{font-size:16px;margin:0 0 8px}.sub{color:var(--mute);font-size:13px}
+.tabs{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:14px}
+.tabs button{flex:1;border:0;background:none;color:var(--mute);font:inherit;font-weight:700;padding:10px 4px;border-radius:9px;cursor:pointer}
+.tabs button.on{background:var(--blue);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px}
+select,input,textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);margin:6px 0}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:700;padding:9px 14px;border-radius:10px;cursor:pointer}
+.btn.p{background:var(--blue);border-color:var(--blue);color:#fff}.btn.ok{background:var(--green);border-color:var(--green);color:#fff}.btn.no{color:var(--red);border-color:var(--red)}
+.item{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.item .g{flex:1;min-width:200px}
+.why{color:var(--amber);font-weight:700;font-size:13.5px}.good{color:var(--green);font-weight:700}.bad{color:var(--red);font-weight:700}
+img.s{width:200px;max-width:100%;height:auto;border-radius:12px;cursor:zoom-in}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:50;cursor:zoom-out}#lb[hidden]{display:none}#lb img{max-width:92vw;max-height:88vh;border-radius:12px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:480px}th,td{text-align:left;padding:8px;border-top:1px solid var(--line);white-space:nowrap}th{border-top:0;color:var(--mute);font-size:13px}
+.errs{color:var(--red);font-size:13.5px;margin:8px 0}
+</style></head><body><div class="app">
+<div class="brand"><div class="logo" role="img" aria-label="Kurogi"></div><h1>Absen admin</h1></div>
+<div class="card" id="lg"><b>Admin password</b><input id="pw" type="password"><button class="btn p" id="go">Open</button><div class="errs" id="le"></div></div>
+<div id="app" hidden>
+<div class="tabs"><button data-t="rev">Review</button><button data-t="day">Today</button><button data-t="sch">Schedule</button><button data-t="pay">Payroll</button><button data-t="set">Setup</button></div>
+<div id="v"></div></div></div>
+<div id="lb" hidden><img id="lbi" alt="Selfie"></div>
+<div id="sv" hidden><div class="sv-in" id="svb"></div></div>
+<script>
+const $=s=>document.querySelector(s),SS=sessionStorage;
+async function api(p,o={}){const r=await fetch(p,{...o,headers:{'content-type':'application/json','x-admin':SS.getItem('pw')||''}});const j=await r.json().catch(()=>({}));if(r.status===401)throw Error('Wrong admin password');return{ok:r.ok,j}}
+const WHY={outside_office:'Outside the restaurant area',low_accuracy:'Low GPS accuracy',impossible_travel:'Impossible travel',no_location:'Location blocked',no_selfie:'No selfie',no_shift_today:'No shift scheduled',no_clock_out:'Missed clock-out',auto_clock_out:'Auto clock-out'};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// PDF-START
+const PDF_H=[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
+const PDF_B=[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584];
+async function pdfDeflate(u8){const cs=new CompressionStream('deflate'),w=cs.writable.getWriter();w.write(u8);w.close();return new Uint8Array(await new Response(cs.readable).arrayBuffer())}
+const pdfTxt=s=>String(s??'').replace(/[\u2013\u2014]/g,'-').replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/[^\x20-\xFF]/g,'?');
+function pdfW(s,bold,size){const t=bold?PDF_B:PDF_H;let w=0;for(const ch of s){const c=ch.charCodeAt(0);w+=(c>=32&&c<=126?t[c-32]:556)}return w*size/1000}
+const pdfEsc=s=>s.replace(/[\\()]/g,'\\$&');
+function pdfWrap(s,bold,size,max){const out=[];let line='';for(const w of pdfTxt(s).split(' ')){const t=line?line+' '+w:w;if(pdfW(t,bold,size)>max&&line){out.push(line);line=w}else line=t}if(line)out.push(line);return out}
+const pdfRp=n=>'Rp '+String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+// d: {name,type,period,issued,earnings,deductions,net,att,draft}  logo: {w,h,gray} (grey levels, already on white)
+async function makePdf(d,logo){
+  const PW=595.28,PH=841.89,M=54,RX=PW-M,INK='0.114 0.114 0.106',GREY='0.369 0.42 0.51',LINE='0.88 0.9 0.94';
+  let c='';const Y=y=>(PH-y).toFixed(2);
+  const txt=(s,x,y,size,bold,align)=>{s=pdfTxt(s);if(align==='r')x-=pdfW(s,bold,size);c+=`BT /${bold?'F2':'F1'} ${size} Tf ${x.toFixed(2)} ${Y(y)} Td (${pdfEsc(s)}) Tj ET\n`};
+  const rule=(y,w)=>{c+=`${w} w ${M} ${Y(y)} m ${RX.toFixed(2)} ${Y(y)} l S\n`};
+  const lh=logo?120*logo.h/logo.w:0;
+  if(logo)c+=`q 120 0 0 ${lh.toFixed(2)} ${M} ${Y(48+lh)} cm /Im1 Do Q\n`;
+  c+=`${GREY} rg\n`;txt('PAYSLIP',RX,58,8,true,'r');
+  c+=`${INK} rg\n`;txt(d.period,RX,78,15,true,'r');
+  if(d.draft){c+='0.9 0.28 0.3 rg\n';txt('DRAFT - NOT FINAL',RX,92,8,true,'r')}
+  c+=`${INK} RG\n`;rule(108,1.6);
+  const meta=[['Employee',d.name],['Pay type',d.type==='hourly'?'Hourly':'Monthly'],['Period',d.period],['Issued',d.issued]];
+  meta.forEach(([l,v],i)=>{const x=i%2?310:M,y=132+Math.floor(i/2)*42;c+=`${GREY} rg\n`;txt(l,x,y,8,false);c+=`${INK} rg\n`;txt(v,x,y+16,11,true)});
+  let y=232;
+  const section=(title,rows,neg)=>{
+    c+=`${GREY} rg\n`;txt(title.toUpperCase(),M,y,8,true);y+=8;
+    if(!rows.length)rows=[{l:'None',a:null}];
+    for(const r of rows){
+      c+=`${INK} rg\n`;txt(r.l,M,y+16,10.5,false);
+      if(r.n){c+=`${GREY} rg\n`;txt(r.n,M,y+28,8.5,false)}
+      c+=`${INK} rg\n`;txt(r.a==null?'-':(neg?'- ':'')+pdfRp(r.a),RX,y+16,10.5,false,'r');
+      y+=r.n?38:28;c+=`${LINE} RG\n`;rule(y,0.5);
+    }
+    y+=16;
+  };
+  section('Earnings',d.earnings,false);section('Deductions',d.deductions,true);
+  y+=4;c+=`${INK} rg\n${M} ${Y(y+48)} ${(RX-M).toFixed(2)} 48 re f\n1 1 1 rg\n`;
+  txt('TAKE-HOME PAY',M+18,y+29,9,true);txt(pdfRp(d.net),RX-18,y+32,19,true,'r');y+=48+22;
+  c+=`${GREY} rg\n`;for(const ln of pdfWrap(d.att,false,8.5,RX-M)){txt(ln,M,y,8.5,false);y+=12}
+  const enc=s=>Uint8Array.from(s,ch=>ch.charCodeAt(0)&255);
+  const parts=[],offs=[];let len=0;const push=u=>{parts.push(u);len+=u.length};
+  const cat=(a,b)=>{const o=new Uint8Array(a.length+b.length);o.set(a);o.set(b,a.length);return o};
+  const obj=(n,body)=>{offs[n]=len;push(enc(n+' 0 obj\n'));push(typeof body==='string'?enc(body):body);push(enc('\nendobj\n'))};
+  const stream=(dict,bytes)=>cat(enc(`<< ${dict} /Length ${bytes.length} >>\nstream\n`),cat(bytes,enc('\nendstream')));
+  push(enc('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n'));
+  obj(1,'<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2,'<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+  obj(3,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >>${logo?' /XObject << /Im1 7 0 R >>':''} >> >>`);
+  obj(4,stream('',enc(c)));
+  obj(5,'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+  obj(6,'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+  if(logo)obj(7,stream(`/Type /XObject /Subtype /Image /Width ${logo.w} /Height ${logo.h} /ColorSpace /DeviceGray /BitsPerComponent 8 /Filter /FlateDecode`,await pdfDeflate(logo.gray)));
+  const n=logo?8:7,xref=len;
+  let x=`xref\n0 ${n}\n0000000000 65535 f \n`;for(let i=1;i<n;i++)x+=String(offs[i]).padStart(10,'0')+' 00000 n \n';
+  push(enc(x+`trailer\n<< /Size ${n} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`));
+  const out=new Uint8Array(len);let p=0;for(const u of parts){out.set(u,p);p+=u.length}return out;
+}
+// PDF-END
+
+const slipStore=new Map();
+const sFmt=d=>new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+function slipMeta(s){
+  const period=s.from?`${sFmt(s.from)} - ${sFmt(s.to)} ${s.to.slice(0,4)}`:new Date(s.month+'-01T00:00:00').toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  const att=`Worked ${s.aDays} of ${s.sDays} scheduled days`+(s.leaveDays?` | ${s.leaveDays} annual leave day${s.leaveDays>1?'s':''} (paid)`:'')+(s.lateDays?` | ${s.lateDays} late clock-in${s.lateDays>1?'s':''}`:'');
+  return {period,att,issued:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})};
+}
+let logoCache;
+async function getLogo(){
+  if(logoCache)return logoCache;
+  const img=new Image();img.src='/img/kurogi.png';await img.decode();
+  const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;
+  const x=c.getContext('2d');x.drawImage(img,0,0);const px=x.getImageData(0,0,c.width,c.height).data,g=new Uint8Array(c.width*c.height);
+  for(let i=0;i<g.length;i++)g[i]=Math.round(255-px[i*4+3]*(255-29)/255);
+  return logoCache={w:c.width,h:c.height,gray:g};
+}
+async function slipPdf(e){
+  const s=e.s,m=slipMeta(s);
+  const bytes=await makePdf({name:s.name,type:s.type,period:m.period,issued:m.issued,earnings:s.earnings,deductions:s.deductions,net:s.net,att:m.att,draft:e.draft},await getLogo().catch(()=>null));
+  return new File([bytes],`Payslip_${s.name.replace(/[^A-Za-z0-9]+/g,'_')}_${s.key||s.month}.pdf`,{type:'application/pdf'});
+}
+function openSlip(key){
+  const e=slipStore.get(key);if(!e)return;const s=e.s,m=slipMeta(s);
+  const line=x=>`<div class="ps-row"><span>${esc(x.l)}${x.n?`<small>${esc(x.n)}</small>`:''}</span><span>${rpf(x.a)}</span></div>`;
+  const canShare=!!(navigator.canShare&&navigator.canShare({files:[new File(['x'],'a.pdf',{type:'application/pdf'})]}));
+  $('#svb').innerHTML=`<div class="ps-paper"><div class="ps-top"><img src="/img/kurogi.png" alt="Kurogi"><div class="ps-ttl"><b>Payslip</b><span>${esc(m.period)}</span>${e.draft?'<em>Draft - not final</em>':''}</div></div>
+  <div class="ps-meta"><div><small>Employee</small><b>${esc(s.name)}</b></div><div><small>Pay type</small><b>${s.type==='hourly'?'Hourly':'Monthly'}</b></div><div><small>Period</small><b>${esc(m.period)}</b></div><div><small>Issued</small><b>${esc(m.issued)}</b></div></div>
+  <h4>Earnings</h4>${s.earnings.map(line).join('')}<h4>Deductions</h4>${s.deductions.length?s.deductions.map(line).join(''):'<div class="ps-row"><span>None</span><span>-</span></div>'}
+  <div class="ps-net"><span>Take-home pay</span><b>${rpf(s.net)}</b></div><div class="ps-foot">${esc(m.att)}</div></div>
+  <div class="ps-act"><button class="btn p" id="spd">Download PDF</button>${canShare?'<button class="btn" id="sps">Share PDF</button>':''}${waLink(s,e.tag,e.per,e.when,e.tpl)}<button class="btn" id="spp">Print</button><button class="btn" id="spc">Close</button></div>
+  <div class="sub ps-help">${canShare?'On a phone: tap Share PDF, choose WhatsApp, then the person.':'On a computer: download the PDF, press WhatsApp (the message opens ready), then attach the PDF in the chat.'}</div>`;
+  $('#sv').hidden=false;
+  $('#spc').onclick=()=>{$('#sv').hidden=true};
+  $('#spp').onclick=()=>window.print();
+  $('#spd').onclick=async()=>{const f=await slipPdf(e),u=URL.createObjectURL(f),a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),8000)};
+  const sb=$('#sps');if(sb)sb.onclick=async()=>{const f=await slipPdf(e);try{await navigator.share({files:[f],text:waFill(e.tpl,{name:s.greet||s.name,period:e.per,when:e.when,link:location.origin+'/'})})}catch(x){if(x.name!=='AbortError')alert('Could not open the share sheet. Use Download PDF instead.')}};
+}
+const waFill=(tpl,v)=>Object.entries(v).reduce((s,[k,x])=>s.split('{'+k+'}').join(x),tpl);
+function waLink(r,tag,period,when,tpl){
+  if(!r.phone)return '<span class="sub">no phone</span>';
+  const msg=waFill(tpl,{name:r.greet||r.name,period,when,link:location.origin+'/'});
+  const sent=localStorage.getItem('wa:'+tag+':'+r.id);
+  return `<a class="btn" style="padding:4px 10px;text-decoration:none;display:inline-block" href="https://wa.me/${r.phone}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener" data-wa="${tag}:${r.id}">${sent?'Sent ✓':'WhatsApp'}</a>`;
+}
+const splitLoc=s=>String(s||'').split(/\s*(?:,|;|\||\/|&|\bdan\b|\band\b)\s*/i).map(x=>x.trim()).filter(Boolean);
+const slug=n=>String(n).toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+document.addEventListener('click',e=>{const sv=e.target.closest('[data-sv]');if(sv){openSlip(sv.dataset.sv);return}if(e.target.id==='sv'){$('#sv').hidden=true;return}const w=e.target.closest('[data-wa]');if(w){localStorage.setItem('wa:'+w.dataset.wa,'1');w.textContent='Sent ✓'}const i=e.target.closest('img.s');if(i){$('#lbi').src=i.src;$('#lb').hidden=false}else if(e.target.closest('#lb'))$('#lb').hidden=true});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){$('#lb').hidden=true;$('#sv').hidden=true;return}
+  // Enter in a text box presses the main (blue) button of the same card
+  if(e.key==='Enter'&&e.target.tagName==='INPUT'&&!['checkbox','file','date','month','time'].includes(e.target.type)){
+    const b=e.target.closest('.card')&&e.target.closest('.card').querySelector('.btn.p');
+    if(b&&!b.disabled){e.preventDefault();b.click()}
+  }
+});
+$('#go').onclick=async()=>{SS.setItem('pw',$('#pw').value);try{await api('/api/admin/config');$('#lg').hidden=true;$('#app').hidden=false;show('rev')}catch(e){$('#le').textContent=e.message}};
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>show(b.dataset.t));
+function show(t){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));({rev,day,sch,pay,set})[t]()}
+async function rev(){
+  const{j}=await api('/api/admin/review');
+  $('#v').innerHTML=j.length?j.map(x=>`<div class="card item">${x.ph?`<img class="s" src="${x.ph}" alt="selfie">`:''}<div class="g"><b>${esc(x.name)}</b> · ${x.date} · in ${x.in||'-'} ${x.out?'· out '+x.out:''}${x.place?' · '+esc(x.place):''}<div class="why">${x.fl.map(f=>WHY[f]||f).join(' · ')}</div>${x.fl.includes('no_clock_out')?`<div class="sub">Set the clock-out time (optional): <input type="time" data-t="${x.key}" style="width:auto;display:inline-block"></div>`:''}</div><button class="btn ok" data-k="${x.key}" data-d="approved">Approve</button><button class="btn no" data-k="${x.key}" data-d="rejected">Reject</button></div>`).join(''):'<div class="card sub">Nothing to review.</div>';
+  document.querySelectorAll('[data-k]').forEach(b=>b.onclick=async()=>{await api('/api/admin/review',{method:'POST',body:JSON.stringify({key:b.dataset.k,decision:b.dataset.d,out:(document.querySelector(`[data-t="${b.dataset.k}"]`)||{}).value})});rev()});
+}
+async function day(d){
+  const{j}=await api('/api/admin/attendance'+(d?'?date='+d:''));
+  $('#v').innerHTML=`<div class="card"><h2>Attendance <input type="date" id="dd" value="${j.date}" style="width:auto;display:inline-block"></h2><div class="scroll"><table><tr><th></th><th>Name</th><th>Place</th><th>Shift</th><th>In</th><th>Out</th><th>After shift end</th><th>Late</th><th>Status</th></tr>${j.rows.map(r=>`<tr><td>${r.ph?`<img class="s" style="width:96px" src="${r.ph}" alt="">`:''}</td><td>${esc(r.name)}</td><td>${esc(r.place||'-')}</td><td>${esc(r.code||'-')}</td><td>${r.in||'-'}</td><td>${r.out||'-'}${r.auto?' (auto)':''}${r.in?` <button class="btn" data-eo="${r.id}" style="padding:2px 8px">Set</button>`:''}</td><td>${r.over?'+'+r.over+' min':'-'}</td><td>${r.late?r.late+' min':'-'}</td><td class="${r.in&&!r.out&&j.date<j.today?'bad':r.status==='ok'||r.status==='approved'?'good':r.status?'bad':''}">${r.in&&!r.out&&j.date<j.today?'no clock-out':r.status||(r.code&&r.code!=='OFF'?'not yet':'')}</td></tr>`).join('')}</table></div></div>`;
+  $('#dd').onchange=()=>day($('#dd').value);
+  document.querySelectorAll('[data-eo]').forEach(b=>b.onclick=async()=>{const v=prompt('Clock-out time (24-hour, for example 16:00)');if(!v)return;const r=await api('/api/admin/attendance',{method:'POST',body:JSON.stringify({date:j.date,id:b.dataset.eo,out:v.trim()})});if(!r.ok){alert(r.j.error);return}day(j.date)});
+}
+function iso(v){if(typeof v==='number')return new Date(Math.round((v-25569)*864e5)).toISOString().slice(0,10);v=String(v).trim();let m=v.match(/^\d{4}-\d{2}-\d{2}/);if(m)return m[0];m=v.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);return m?`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`:null}
+let rows=[];
+async function sch(){
+  $('#v').innerHTML=`<div class="card"><h2>Import weekly schedule</h2><div class="sub">Excel (.xlsx) or CSV. Column A = Name, B = PIN. Optional column "Phone": the person's WhatsApp number (for the one-tap payslip notice). Optional column "Login name": what that person types to sign in (different from the payroll name in Name). Optional column "Location": a restaurant name from the Setup tab to limit that person to it, two or more names separated by a comma (Cabang A, Cabang B) for people who work at several places, or ALL for any restaurant. Then one column per date with a shift code (OFF for days off). See schedule-template.csv.</div><input type="file" id="f" accept=".xlsx,.xls,.csv"><div id="pv"></div></div><div class="card" id="lvc"></div>`;
+  loadLeave();
+  $('#f').onchange=async e=>{
+    const f=e.target.files[0];if(!f)return;
+    const cfg=(await api('/api/admin/config')).j,shifts=cfg.shifts||{},offs=cfg.offices||[];
+    const wb=XLSX.read(await f.arrayBuffer(),{type:'array'}),g=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''});
+    const cols=[],errs=[];let lc=-1,gc=-1,pc=-1;
+    const byKey=Object.fromEntries(Object.keys(shifts).map(k=>[k.trim().replace(/\s+/g,' ').toLowerCase(),k]));
+    (g[0]||[]).forEach((h,i)=>{if(i<2||String(h).trim()==='')return;const t=String(h).trim().toLowerCase();if(t==='location'||t==='lokasi'){lc=i;return}if(['login name','login','username','nama login'].includes(t)){gc=i;return}if(['phone','whatsapp','no hp','nomor hp','no. hp','hp','telepon','no wa','wa'].includes(t)){pc=i;return}const d=iso(h);if(d)cols.push({i,d});else errs.push(`Column ${i+1} header is not a date`)});
+    rows=g.slice(1).filter(r=>String(r[0]).trim()).map(r=>{let pin=String(r[1]).trim();if(/^\d+$/.test(pin))pin=pin.padStart(4,'0');const days={};cols.forEach(c=>{const v=String(r[c.i]).trim().replace(/\s+/g,' ')||'OFF',k=v.toLowerCase();days[c.d]=k==='off'?'OFF':(byKey[k]||v)});const row={name:String(r[0]).trim(),pin,days};if(lc>=0)row.loc=String(r[lc]).trim();if(gc>=0)row.login=String(r[gc]).trim();if(pc>=0)row.phone=String(r[pc]).trim();return row});
+    rows.forEach(r=>{Object.entries(r.days).forEach(([d,c])=>{if(c!=='OFF'&&!shifts[c])errs.push(`${r.name} on ${d}: unknown code "${c}"`)});if(r.loc!==undefined){const ps=splitLoc(r.loc),all=ps.length===1&&['all','semua'].includes(ps[0].toLowerCase()),bad=all?[]:ps.filter(p=>!offs.some(o=>o.id===slug(p)));if(bad.length)errs.push(`${r.name}: unknown location "${bad[0]}"`)}});
+    const ds=cols.map(c=>c.d);
+    $('#pv').innerHTML=`<p>Preview: ${rows.length} employees, ${ds.length} days</p>${errs.length?`<div class="errs">${errs.slice(0,12).map(esc).join('<br>')}<br>Fix the file and choose it again.</div>`:''}<div class="scroll"><table><tr><th>Name</th>${gc>=0?'<th>Login name</th>':''}${pc>=0?'<th>WhatsApp</th>':''}${lc>=0?'<th>Location</th>':''}${ds.map(d=>`<th>${d.slice(5)}</th>`).join('')}</tr>${rows.map(r=>`<tr><td>${esc(r.name)}</td>${gc>=0?`<td>${esc(r.login||'')}</td>`:''}${pc>=0?`<td>${esc(r.phone||'')}</td>`:''}${lc>=0?`<td>${esc(r.loc||'ALL')}</td>`:''}${ds.map(d=>`<td>${esc(r.days[d])}</td>`).join('')}</tr>`).join('')}</table></div><button class="btn p" id="imp" ${errs.length||!rows.length?'disabled':''}>Import</button><div id="res"></div>`;
+    $('#imp').onclick=async()=>{const{ok,j}=await api('/api/admin/schedule',{method:'POST',body:JSON.stringify({rows})});$('#res').innerHTML=ok?`<p class="good">Imported ${j.employees} employees, ${j.days} shifts.</p>`:`<div class="errs">${(j.errors||[j.error]).map(esc).join('<br>')}</div>`}
+  };
+}
+const rpf=n=>'Rp '+Math.round(n).toLocaleString('id-ID');
+const num=v=>typeof v==='number'?Math.round(v):(Number(String(v).replace(/[^\d]/g,''))||0);
+const ptype=v=>{const s=String(v).trim().toLowerCase();return /hour|jam/.test(s)?'hourly':/month|bulan/.test(s)?'monthly':null};
+async function pay(){
+  const n=new Date(),p=new Date(n.getFullYear(),n.getMonth()-1,1),m0=`${p.getFullYear()}-${String(p.getMonth()+1).padStart(2,'0')}`;
+  $('#v').innerHTML=`<div class="card"><h2>Salary data</h2><div class="sub">Excel or CSV with columns: Name, Pay type (Monthly or Hourly), Rate, and Paid (Weekly or Monthly, optional, default Monthly). For Monthly pay the rate is the monthly salary. For Hourly it is the pay per hour (Rupiah). Weekly-paid staff get payslips from the Period payslips card instead of the monthly run. Staff must already be in a schedule import. See salary-template.csv.</div><input type="file" id="sf" accept=".xlsx,.xls,.csv"><div id="spv"></div></div>
+  <div class="card"><h2>Late deduction</h2><div class="sub">Deducted for each late clock-in, by minutes after the shift starts.</div>
+  <label class="sub" style="display:block;margin:8px 0"><input type="checkbox" id="lo" style="width:auto;margin-right:8px">Deduct for late clock-ins</label>
+  <div class="sub">Tolerance in minutes (no deduction up to this)</div><input id="lt" inputmode="numeric">
+  <div class="sub">Level 1: late over the tolerance. Deduction (Rp)</div><input id="a1" inputmode="numeric">
+  <div class="sub">Level 2: late from this many minutes</div><input id="f2" inputmode="numeric">
+  <div class="sub">Level 2 deduction (Rp)</div><input id="a2" inputmode="numeric">
+  <div class="sub">Level 3: late from this many minutes</div><input id="f3" inputmode="numeric">
+  <div class="sub">Level 3 deduction (Rp)</div><input id="a3" inputmode="numeric">
+  <button class="btn p" id="ls">Save late rules</button><div id="lmsg"></div></div>
+  <div class="card"><h2>WhatsApp message (free, one tap)</h2><div class="sub">Open a payslip with View, then Download PDF (or Share PDF on a phone) and press WhatsApp: the chat opens with this message ready and you attach the PDF. Use {name} and {period}. Do not put salary amounts in the message.</div><textarea id="wat" rows="3"></textarea><button class="btn p" id="wsv">Save message</button><div id="wmsg"></div></div>
+  <div class="card" id="otc"></div>
+  <div class="card" id="pdc"></div>
+  <div class="card"><h2>Payroll run</h2><div class="sub">Payslips appear in each employee's app automatically at 21:00 WIB on the 1st of the following month. Finalize before then.</div><input type="month" id="pm" value="${m0}"><div id="pr"></div></div>`;
+  let prow=[];
+  $('#sf').onchange=async e=>{
+    const f=e.target.files[0];if(!f)return;
+    const wb=XLSX.read(await f.arrayBuffer(),{type:'array'}),g=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''});
+    prow=g.slice(1).filter(r=>String(r[0]).trim()).map(r=>({name:String(r[0]).trim(),type:ptype(r[1]),rate:num(r[2]),freq:/week|minggu/i.test(String(r[3]||''))?'weekly':'monthly'}));
+    const bad=prow.filter(r=>!r.type||!r.rate).map(r=>r.name);
+    $('#spv').innerHTML=`<p>Preview: ${prow.length} employees</p>${bad.length?`<div class="errs">Check the pay type (Monthly or Hourly) and rate for: ${bad.slice(0,10).map(esc).join(', ')}</div>`:''}<div class="scroll"><table><tr><th>Name</th><th>Pay type</th><th>Rate</th><th>Paid</th></tr>${prow.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.type||'?'}</td><td>${rpf(r.rate)}${r.type==='hourly'?' / hour':r.type==='monthly'?' / month':''}</td><td>${r.freq}</td></tr>`).join('')}</table></div><button class="btn p" id="simp" ${prow.length&&!bad.length?'':'disabled'}>Import salary data</button><div id="sres"></div>`;
+    $('#simp').onclick=async()=>{const{ok,j}=await api('/api/admin/paydata',{method:'POST',body:JSON.stringify({rows:prow})});$('#sres').innerHTML=ok?`<p class="good">Saved pay rates for ${j.employees} employees.</p>`:`<div class="errs">${(j.errors||[j.error]).map(esc).join('<br>')}</div>`;if(ok)loadPay()};
+  };
+  $('#pm').onchange=()=>{otFor='';loadPay()};
+  $('#wsv').onclick=async()=>{const r=await api('/api/admin/payroll',{method:'POST',body:JSON.stringify({action:'settings',waTemplate:$('#wat').value})});$('#wmsg').innerHTML=r.ok?'<p class="good">Saved.</p>':`<div class="errs">${esc(r.j.error)}</div>`};
+  $('#ls').onclick=async()=>{
+    const v=id=>parseInt($('#'+id).value)||0;
+    const{ok,j}=await api('/api/admin/payroll',{method:'POST',body:JSON.stringify({action:'settings',lateOn:$('#lo').checked,tolerance:v('lt'),a1:v('a1'),from2:v('f2'),a2:v('a2'),from3:v('f3'),a3:v('a3')})});
+    $('#lmsg').innerHTML=ok?'<p class="good">Saved.</p>':`<div class="errs">${esc(j.error)}</div>`;if(ok)loadPay();
+  };
+  loadPay();loadPeriodUi();
+}
+const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+async function loadPeriodUi(from,to){
+  const n=new Date();to=to||ymd(n);from=from||ymd(new Date(n.getFullYear(),n.getMonth(),n.getDate()-6));
+  const head=`<h2>Period payslips (weekly, or up to today)</h2><div class="sub">Create a payslip for any date range: a week for staff who are paid weekly, or the month so far. Days after today are ignored. Staff see the payslip in their app right away. Monthly-paid staff can be included when the dates stay inside one month (their salary is counted as a share of that month's scheduled hours).</div><div class="sub">From</div><input type="date" id="pf" value="${from}"><div class="sub">To (up to today)</div><input type="date" id="pt" value="${to}">`;
+  const bind=()=>{$('#pf').onchange=$('#pt').onchange=()=>loadPeriodUi($('#pf').value,$('#pt').value)};
+  const{ok,j}=await api(`/api/admin/period?from=${from}&to=${to}`);
+  if(!ok){$('#pdc').innerHTML=head+`<div class="errs">${esc(j.error)}</div>`;bind();return}
+  const f=d=>new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short'}),perTxt=`${f(from)} – ${f(to)} ${to.slice(0,4)}`;
+  j.rows.forEach(r=>{if(!r.skip)slipStore.set(`p:${from}_${to}:${r.id}`,{s:r,draft:!r.created,tag:from+'_'+to,per:perTxt,when:'sudah tersedia',tpl:j.wa})});
+  const t=j.rows.filter(r=>!r.skip),why={no_pay_data:'No pay rate yet',no_schedule:'No scheduled shifts in this period',cross_month:'Monthly pay: choose dates inside one month'};
+  $('#pdc').innerHTML=head+`<div class="scroll"><table><tr><th></th><th>Name</th><th>Pay</th><th>Hours</th><th>Late</th><th>Take-home</th><th></th></tr>${j.rows.map(r=>r.skip?`<tr><td></td><td>${esc(r.name)}</td><td colspan="5" class="sub">${why[r.skip]||r.skip}</td></tr>`:`<tr><td><input type="checkbox" style="width:auto;margin:0" data-pid="${r.id}" ${r.freq==='weekly'?'checked':''}></td><td>${esc(r.name)}${r.warn.length?` <span class="why">(${esc(r.warn.join('; '))})</span>`:''}</td><td>${r.type}${r.freq==='weekly'?' · weekly':''}</td><td>${r.aHrs}/${r.sHrs}${r.leaveDays?` (${r.leaveDays} leave)`:''}</td><td>${r.ded?rpf(r.ded):'-'}</td><td><b>${rpf(r.net)}</b></td><td><button class="btn" style="padding:4px 10px" data-sv="p:${from}_${to}:${r.id}">View</button> ${r.created?`<span class="good">created</span> ${waLink(r,from+'_'+to,perTxt,'sudah tersedia',j.wa)}`:''}</td></tr>`).join('')}</table></div>
+  <div class="sub" style="margin:8px 0">Tick the people to include. Weekly-paid staff are ticked automatically.</div>
+  <button class="btn p" id="pc" ${t.length?'':'disabled'}>Create / update payslips</button> <button class="btn no" id="prm" ${t.some(r=>r.created)?'':'disabled'}>Remove selected payslips</button><div id="pm2"></div>`;
+  bind();
+  const sel=()=>[...document.querySelectorAll('[data-pid]:checked')].map(c=>c.dataset.pid);
+  const act=async(action,text)=>{
+    const ids=sel();if(!ids.length){$('#pm2').innerHTML='<div class="errs">Tick at least one person.</div>';return}
+    if(!confirm(`${text} for ${ids.length} people, ${from} to ${to}?`))return;
+    const r=await api('/api/admin/period',{method:'POST',body:JSON.stringify({action,from,to,ids})});
+    if(!r.ok){$('#pm2').innerHTML=`<div class="errs">${esc(r.j.error)}</div>`;return}
+    await loadPeriodUi(from,to);$('#pm2').innerHTML=`<p class="good">${action==='create'?'Created '+r.j.created+' payslip(s).':'Removed '+r.j.removed+' payslip(s).'}</p>`;
+  };
+  $('#pc').onclick=()=>act('create','Create payslips (staff see them right away)');
+  $('#prm').onclick=()=>act('remove','Remove payslips');
+}
+let otFor='';
+function loadOtOnce(ym){if(otFor!==ym||!$('#oe')){otFor=ym;loadOt(ym)}}
+async function loadOt(ym){
+  const{ok,j}=await api('/api/admin/overtime?month='+ym);if(!ok)return;
+  const rows=j.list.flatMap(e=>e.entries.map(x=>({...x,id:e.id,name:e.name}))).sort((a,b)=>a.date.localeCompare(b.date));
+  $('#otc').innerHTML=`<h2>Overtime (added by HR)</h2><div class="sub">Nothing is added automatically. Entries here are for the month picked below. Pay = hours x the overtime rate. The Today tab shows how long after the shift end someone clocked out, as a hint.</div>
+  <select id="oe">${j.list.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('')}</select>
+  <input type="date" id="od" value="${ym}-01"><input id="oh" inputmode="decimal" placeholder="Hours, e.g. 2.5"><input id="on" placeholder="Note (optional)">
+  <button class="btn p" id="oa">Add overtime</button><div id="om2"></div>
+  <div class="scroll" style="margin-top:10px"><table><tr><th>Date</th><th>Name</th><th>Hours</th><th>Amount</th><th>Note</th><th></th></tr>${rows.map(x=>`<tr><td>${x.date}</td><td>${esc(x.name)}</td><td>${x.hours}</td><td>${rpf(x.amount)}</td><td>${esc(x.note||'')}</td><td><button class="btn no" data-ou="${x.uid}" data-oi="${x.id}">Delete</button></td></tr>`).join('')||'<tr><td colspan="6" class="sub">No overtime entered for this month.</td></tr>'}</table></div>
+  <div class="sub" style="margin-top:10px">Overtime rate per hour (Rp): <input id="dr" inputmode="numeric" style="width:120px;display:inline-block" value="${j.rule.rate}"> <button class="btn" id="ods">Save rate</button></div>`;
+  $('#oa').onclick=async()=>{
+    const r=await api('/api/admin/overtime',{method:'POST',body:JSON.stringify({action:'add',id:$('#oe').value,date:$('#od').value,hours:$('#oh').value,note:$('#on').value})});
+    if(!r.ok){$('#om2').innerHTML=`<div class="errs">${esc(r.j.error)}</div>`;return}
+    loadOt(ym);loadPay();
+  };
+  document.querySelectorAll('[data-ou]').forEach(b=>b.onclick=async()=>{await api('/api/admin/overtime',{method:'POST',body:JSON.stringify({action:'delete',month:ym,id:b.dataset.oi,uid:b.dataset.ou})});loadOt(ym);loadPay()});
+  $('#ods').onclick=async()=>{await api('/api/admin/payroll',{method:'POST',body:JSON.stringify({action:'settings',otRate:$('#dr').value})});loadOt(ym);loadPay()};
+}
+async function loadLeave(ym){
+  ym=ym||new Date().toISOString().slice(0,7);
+  const{ok,j}=await api('/api/admin/leave?month='+ym);if(!ok)return;
+  const rows=j.list.flatMap(e=>e.days.map(d=>({id:e.id,name:e.name,d}))).sort((a,b)=>a.d.localeCompare(b.d));
+  $('#lvc').innerHTML=`<h2>Annual leave (paid)</h2><div class="sub">A leave day keeps the person's scheduled shift but is paid as normal, with no absence deduction. Pick one date or a range.</div>
+  <select id="le">${j.list.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('')}</select>
+  <div class="sub">From</div><input type="date" id="lf" value="${ym}-01"><div class="sub">To</div><input type="date" id="lto" value="${ym}-01">
+  <button class="btn p" id="la">Add leave</button><div id="lmsg2"></div>
+  <div class="sub" style="margin-top:10px">Showing month <input type="month" id="lmm" value="${ym}" style="width:auto;display:inline-block"></div>
+  <div class="scroll"><table><tr><th>Date</th><th>Name</th><th></th></tr>${rows.map(x=>`<tr><td>${x.d}</td><td>${esc(x.name)}</td><td><button class="btn no" data-ld="${x.d}" data-li="${x.id}">Remove</button></td></tr>`).join('')||'<tr><td colspan="3" class="sub">No leave this month.</td></tr>'}</table></div>`;
+  $('#lmm').onchange=()=>loadLeave($('#lmm').value);
+  $('#la').onclick=async()=>{
+    const r=await api('/api/admin/leave',{method:'POST',body:JSON.stringify({action:'add',id:$('#le').value,from:$('#lf').value,to:$('#lto').value})});
+    if(!r.ok){$('#lmsg2').innerHTML=`<div class="errs">${esc(r.j.error)}</div>`;return}
+    await loadLeave(ym);$('#lmsg2').innerHTML=`<p class="good">Added ${r.j.days} day(s). ${r.j.shifts} of them have a scheduled shift.</p>`;
+  };
+  document.querySelectorAll('[data-ld]').forEach(b=>b.onclick=async()=>{await api('/api/admin/leave',{method:'POST',body:JSON.stringify({action:'remove',id:b.dataset.li,date:b.dataset.ld})});loadLeave(ym)});
+}
+async function loadPay(){
+  const ym=$('#pm').value;if(!ym)return;
+  loadOtOnce(ym);
+  const{ok,j}=await api('/api/admin/payroll?month='+ym);
+  if(!ok){$('#pr').innerHTML=`<div class="errs">${esc(j.error)}</div>`;return}
+  const s=j.settings,editing=document.activeElement&&['lt','a1','f2','a2','f3','a3'].includes(document.activeElement.id);
+  if(document.activeElement.id!=='wat')$('#wat').value=j.wa;
+  const per=new Date(ym+'-01T00:00:00').toLocaleDateString('id-ID',{month:'long',year:'numeric'}),when=Date.now()>=j.release?'sudah tersedia':`akan tersedia pada ${new Date(j.release).toLocaleDateString('id-ID',{day:'numeric',month:'long',timeZone:'Asia/Jakarta'})} pukul 21.00 WIB`;
+  if(!editing){$('#lo').checked=s.on;$('#lt').value=s.tol;$('#a1').value=s.a1;$('#f2').value=s.from2;$('#a2').value=s.a2;$('#f3').value=s.from3;$('#a3').value=s.a3}
+  j.rows.forEach(r=>{if(!r.skip)slipStore.set('m:'+ym+':'+r.id,{s:r,draft:!j.run,tag:ym,per,when,tpl:j.wa})});
+  const t=j.rows.filter(r=>!r.skip),sum=k=>t.reduce((a,r)=>a+r[k],0);
+  $('#pr').innerHTML=`${j.pending?`<div class="errs">${j.pending} clock-in(s) this month still need review. Until you reject them they count as present.</div>`:''}${j.ended?'':'<div class="errs">This month has not finished yet, so this is a preview only.</div>'}
+  <div class="scroll"><table><tr><th>Name</th><th>Pay</th><th>Hours</th><th>Late deduction</th><th>Take-home</th><th></th>${j.run?'<th>WhatsApp</th>':''}</tr>${j.rows.map(r=>r.skip?`<tr><td>${esc(r.name)}</td><td colspan="4" class="sub">${({no_pay_data:'No pay rate yet',weekly:'Paid weekly: use the Period payslips card above'}[r.skip]||'No schedule this month')}</td></tr>`:`<tr><td>${esc(r.name)}${r.warn.length?` <span class="why">(${esc(r.warn.join('; '))})</span>`:''}</td><td>${r.type}</td><td>${r.aHrs}/${r.sHrs}${r.leaveDays?` (${r.leaveDays} leave)`:''}</td><td>${r.ded?rpf(r.ded):'-'}</td><td><b>${rpf(r.net)}</b></td><td><button class="btn" style="padding:4px 10px" data-sv="m:${ym}:${r.id}">View</button></td>${j.run?`<td>${waLink(r,ym,per,when,j.wa)}</td>`:''}</tr>`).join('')}<tr><td><b>Total (${t.length})</b></td><td></td><td></td><td><b>${rpf(sum('ded'))}</b></td><td><b>${rpf(sum('net'))}</b></td></tr></table></div>
+  ${j.run?`<p class="good">Payslips finalized ${new Date(j.run.at).toLocaleString('en-GB')} for ${j.run.count} employees.</p>`:''}
+  <button class="btn p" id="fin" ${j.ended&&t.length?'':'disabled'}>${j.run?'Recalculate payslips':'Finalize payslips'}</button><div id="fm"></div>`;
+  $('#fin').onclick=async()=>{
+    if(!confirm(`${j.run?'Recalculate':'Finalize'} payslips for ${ym}? Employees will see them from 21:00 WIB on the 1st.${j.pending?'\n\n'+j.pending+' clock-in(s) are still unreviewed.':''}`))return;
+    const{ok,j:r}=await api('/api/admin/payroll',{method:'POST',body:JSON.stringify({action:'finalize',month:ym,force:j.pending>0})});
+    $('#fm').innerHTML=ok?`<p class="good">Done. ${r.count} payslips saved.</p>`:`<div class="errs">${esc(r.error)}</div>`;if(ok)loadPay();
+  };
+}
+async function loadEmps(msg){
+  const{ok,j}=await api('/api/admin/employees');if(!ok)return;
+  const row=(e,btns)=>`<tr><td>${esc(e.name)}</td><td>${esc(e.login||'-')}</td><td>${esc(e.loc)}</td><td>${esc(e.pay||'-')}</td><td>${esc(e.phone||'-')}</td><td>${btns}</td></tr>`;
+  const head='<tr><th>Payroll name</th><th>Login</th><th>Location</th><th>Pay</th><th>WhatsApp</th><th></th></tr>';
+  $('#emc').innerHTML=`<h2>Employees</h2><div class="sub">Remove: the person can no longer sign in and leaves schedules, Today and payroll. Their past attendance and payslips are kept, and you can restore them. Finalize payroll for their last month before removing someone. Delete permanently erases everything about a person and cannot be undone.</div>
+  <div class="scroll"><table>${head}${j.active.map(e=>row(e,`<button class="btn" data-ep="${e.id}" data-n="${esc(e.name)}" data-pn="${esc(e.phone||'')}">Phone</button> <button class="btn no" data-ea="${e.id}" data-n="${esc(e.name)}">Remove</button>`)).join('')||'<tr><td colspan="5" class="sub">No employees yet.</td></tr>'}</table></div>
+  ${j.archived.length?`<h2 style="margin-top:14px">Removed employees</h2><div class="scroll"><table>${head}${j.archived.map(e=>row(e,`<button class="btn" data-er="${e.id}">Restore</button> <button class="btn no" data-ed="${e.id}" data-n="${esc(e.name)}">Delete permanently</button>`)).join('')}</table></div>`:''}<div id="emsg">${msg||''}</div>`;
+  const go=async(action,id,confirmText,okMsg,extra={})=>{const r=await api('/api/admin/employees',{method:'POST',body:JSON.stringify({action,id,confirm:confirmText,...extra})});loadEmps(r.ok?`<p class="good">${okMsg}${r.j.loginDropped?' Their login name was taken by someone else, so they sign in with their payroll name until you import a new login name.':''}</p>`:`<div class="errs">${esc(r.j.error)}</div>`)};
+  document.querySelectorAll('[data-ep]').forEach(b=>b.onclick=()=>{const v=prompt(`WhatsApp number for ${b.dataset.n} (for example 0812 3456 7890). Leave empty to remove it.`,b.dataset.pn);if(v!==null)go('phone',b.dataset.ep,'','Saved.',{phone:v})});
+  document.querySelectorAll('[data-ea]').forEach(b=>b.onclick=()=>{if(confirm(`Remove ${b.dataset.n}? They can no longer sign in and will leave schedules and payroll. Their history is kept.`))go('archive',b.dataset.ea,'','Removed.')});
+  document.querySelectorAll('[data-er]').forEach(b=>b.onclick=()=>go('restore',b.dataset.er,'','Restored.'));
+  document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{const t=prompt(`This permanently erases everything about ${b.dataset.n}: attendance, photos, leave, overtime and payslips. It cannot be undone.\n\nType their payroll name to confirm:`);if(t)go('delete',b.dataset.ed,t,'Deleted permanently.')});
+}
+let offs=[];
+function drawOffs(){
+  $('#ofs').innerHTML=offs.map((o,i)=>`<div class="card" style="margin:8px 0"><input data-i="${i}" data-f="name" placeholder="Name, e.g. Cabang A" value="${esc(o.name)}"><input data-i="${i}" data-f="lat" placeholder="Latitude" value="${esc(o.lat)}"><input data-i="${i}" data-f="lng" placeholder="Longitude" value="${esc(o.lng)}"><input data-i="${i}" data-f="radius" placeholder="Allowed radius in metres" value="${esc(o.radius??150)}"><button class="btn" data-h="${i}">Use my current location</button> <button class="btn no" data-x="${i}">Remove</button></div>`).join('')||'<div class="sub">No locations yet.</div>';
+  document.querySelectorAll('#ofs input').forEach(el=>el.oninput=()=>{offs[el.dataset.i][el.dataset.f]=el.value});
+  document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>navigator.geolocation.getCurrentPosition(p=>{const o=offs[b.dataset.h];o.lat=p.coords.latitude;o.lng=p.coords.longitude;drawOffs()},()=>{$('#sm').innerHTML='<div class="errs">Location is blocked in this browser.</div>'},{enableHighAccuracy:true}));
+  document.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{offs.splice(b.dataset.x,1);drawOffs()});
+}
+async function set(){
+  const c=(await api('/api/admin/config')).j,sh=c.shifts||{M:{start:'07:00',end:'15:00'},Md:{start:'14:00',end:'22:00'},E:{start:'22:00',end:'06:00'}};
+  offs=(c.offices||[]).map(o=>({...o}));
+  $('#v').innerHTML=`<div class="card"><h2>Shift codes</h2><div class="sub">One per line: code,start,end. OFF is built in.</div><textarea id="sh" rows="6">${Object.entries(sh).map(([k,v])=>`${k},${v.start},${v.end}`).join('\n')}</textarea>
+  <h2 style="margin-top:14px">Restaurant locations</h2><div class="sub">Add each restaurant. Stand inside it and press "Use my current location". Don't rename a location after assigning staff to it.</div><div id="ofs"></div>
+  <button class="btn" id="addo">+ Add location</button> <button class="btn p" id="save">Save</button><div id="sm"></div></div><div class="card" id="emc"></div>`;
+  drawOffs();loadEmps();
+  $('#addo').onclick=()=>{offs.push({name:'',lat:'',lng:'',radius:150});drawOffs()};
+  $('#save').onclick=async()=>{
+    const s=$('#sh').value.split('\n').map(l=>l.split(',').map(x=>x.trim())).filter(a=>a[0]).map(([code,start,end])=>({code,start,end}));
+    const o=offs.filter(x=>String(x.name).trim()||String(x.lat).trim()).map(x=>({name:x.name,lat:parseFloat(x.lat),lng:parseFloat(x.lng),radius:parseInt(x.radius)||150}));
+    const{ok,j}=await api('/api/admin/config',{method:'POST',body:JSON.stringify({shifts:s,offices:o})});
+    $('#sm').innerHTML=ok?'<p class="good">Saved.</p>':`<div class="errs">${esc(j.error)}</div>`};
+}
+</script></body></html>
