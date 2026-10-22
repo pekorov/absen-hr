@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Absen QR</title>
+<link rel="icon" type="image/png" href="/img/favicon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Shippori+Mincho:wght@800&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{--paper:#F6F1E7;--card:#FFFDF8;--ink:#2B2A24;--mute:#7B7666;--line:#E4DCCB;--matcha:#4E6B3A}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--paper);color:var(--ink);font:16px/1.5 'Plus Jakarta Sans',system-ui,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right)) 24px max(16px,env(safe-area-inset-left))}
+.k{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:460px;width:100%;text-align:center}
+.logo{width:120px;aspect-ratio:723/270;background:var(--ink);-webkit-mask:url(/img/kurogi.png) center/contain no-repeat;mask:url(/img/kurogi.png) center/contain no-repeat}
+h1{font-family:'Shippori Mincho',Georgia,serif;font-size:26px;margin:0}
+#q{background:#fff;padding:14px;border-radius:12px;border:1px solid var(--line)}#q img,#q canvas{display:block;width:min(70vw,320px)!important;height:auto!important}
+.bar{width:min(70vw,320px);height:6px;border-radius:9px;background:var(--line);overflow:hidden}.bar i{display:block;height:100%;background:var(--matcha);transition:width 1s linear}
+.sub{color:var(--mute);font-size:14px}.err{color:#8E2A1E;font-weight:600}
+.beta{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);border:1px solid var(--line);border-radius:99px;padding:2px 10px}
+</style></head><body>
+<div class="k"><div class="logo" role="img" aria-label="Kurogi"></div><span class="beta">Beta</span><h1 id="t">Scan to clock in</h1>
+<div id="q"></div><div class="bar"><i id="bar"></i></div>
+<div class="sub">Open Absen on your phone, tap <b>Clock in</b>, then <b>Scan the counter QR code</b>. You can also scan it with your phone camera. The code changes every 30 seconds.</div>
+<div class="err" id="err"></div></div>
+<script>
+// Kiosk link from Setup: /qr.html?b=<branch>&k=<kiosk key>&n=<branch name>. Keep this link on the counter tablet only.
+const p=new URLSearchParams(location.search),b=p.get('b'),k=p.get('k');
+document.getElementById('t').textContent='Scan to clock in'+(p.get('n')?' · '+p.get('n'):'');
+const te=new TextEncoder(),hex=a=>[...new Uint8Array(a)].map(x=>x.toString(16).padStart(2,'0')).join('');
+let key,qrc,last=-1;
+async function code(slot){key=key||await crypto.subtle.importKey('raw',te.encode(k),{name:'HMAC',hash:'SHA-256'},false,['sign']);return hex(await crypto.subtle.sign('HMAC',key,te.encode(String(slot)))).slice(0,10)}
+async function tick(){
+  const now=Date.now(),slot=Math.floor(now/30000);
+  document.getElementById('bar').style.width=(100-((now%30000)/300))+'%';
+  if(slot!==last){last=slot;const url=`${location.origin}/?qr=${encodeURIComponent(b)}.${await code(slot)}`;
+    if(!qrc)qrc=new QRCode(document.getElementById('q'),{text:url,width:640,height:640,correctLevel:QRCode.CorrectLevel.M});else{qrc.clear();qrc.makeCode(url)}}
+}
+if(!b||!k||!window.crypto||!crypto.subtle)document.getElementById('err').textContent='This link is incomplete. Copy the kiosk link again from Admin > Setup.';
+else if(!window.QRCode)document.getElementById('err').textContent='Could not load the QR maker. Check the tablet internet connection and reload.';
+else{tick();setInterval(tick,1000);
+  // keep the tablet screen on
+  const wl=async()=>{try{await navigator.wakeLock.request('screen')}catch(e){}};wl();document.addEventListener('visibilitychange',()=>{if(!document.hidden)wl()});}
+</script></body></html>
