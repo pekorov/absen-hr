@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F6F1E7" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#1B1D18" media="(prefers-color-scheme: dark)">
+<title>Absen Kurogi</title>
+<link rel="icon" type="image/png" href="/img/favicon.png"><link rel="apple-touch-icon" href="/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Shippori+Mincho:wght@600;800&display=swap">
+<style>
+:root{--paper:#F6F1E7;--card:#FFFDF8;--ink:#2B2A24;--mute:#7B7666;--line:#E4DCCB;--rule:#E9E1CF;--matcha:#4E6B3A;--on-matcha:#FFFDF8;--shu:#B33A2B;--on-shu:#FFFDF8;--soft:#F1EBDD;
+--ok-bg:#E2EBD5;--ok:#3B5A27;--warn-bg:#F6E2C8;--warn:#8A4B12;--bad-bg:#F5D9D3;--bad:#8E2A1E;--halo:rgba(78,107,58,.14);--halo2:rgba(179,58,43,.14);
+--serif:'Shippori Mincho','Hiragino Mincho ProN','Yu Mincho',Georgia,serif;--sans:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif}
+@media(prefers-color-scheme:dark){:root{--paper:#1B1D18;--card:#24271F;--ink:#EEE9DC;--mute:#A8A290;--line:#363A2E;--rule:#2A2D24;--matcha:#8DB36E;--on-matcha:#17190F;--shu:#E0745F;--on-shu:#1B1D18;--soft:#2C3026;
+--ok-bg:#2B3A22;--ok:#B5D69A;--warn-bg:#3C2F1C;--warn:#F0C27F;--bad-bg:#40231E;--bad:#F2A496;--halo:rgba(141,179,110,.16);--halo2:rgba(224,116,95,.16);color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);-webkit-tap-highlight-color:transparent;
+background-image:repeating-linear-gradient(0deg,transparent 0 27px,var(--rule) 27px 28px)}
+.app{max-width:480px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(36px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:14px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:40px}
+.logo{display:block;aspect-ratio:723/270;background:var(--ink);-webkit-mask:url(/img/kurogi.png) center/contain no-repeat;mask:url(/img/kurogi.png) center/contain no-repeat;width:104px}
+.link{background:none;border:0;color:var(--mute);font:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+h1,h2,.serif{font-family:var(--serif);font-weight:800;letter-spacing:.01em}
+h1{font-size:28px;line-height:1.15;margin:0}h2{font-size:18px;margin:0 0 10px}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:600}
+.sub{color:var(--mute);font-size:13px}
+label.f{display:block;font-size:12px;color:var(--mute);margin-top:12px;font-weight:600}
+input,select,textarea{width:100%;font:inherit;font-size:16px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);margin-top:6px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--matcha);outline-offset:1px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink);font:inherit;font-weight:700;padding:11px 18px;cursor:pointer;text-decoration:none}
+.btn.p{background:var(--matcha);border-color:var(--matcha);color:var(--on-matcha)}.btn.r{color:var(--shu);border-color:var(--shu)}
+.btn.w{width:100%;margin-top:14px}.btn:disabled{opacity:.5;cursor:default}
+.row2{display:flex;gap:8px;flex-wrap:wrap}.row2>.btn{flex:1 1 140px}
+.hello small{display:block;color:var(--mute);font-size:13px}
+.today{position:relative;display:grid;gap:2px}
+.today b{font-family:var(--serif);font-size:22px;font-weight:800}.today em{font-style:normal;color:var(--mute)}
+.chip{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 10px;background:var(--soft);color:var(--mute)}
+.chip.loc{position:absolute;right:0;top:0;background:var(--shu);color:var(--on-shu)}
+.chip.ok{background:var(--ok-bg);color:var(--ok)}.chip.warn{background:var(--warn-bg);color:var(--warn)}.chip.bad{background:var(--bad-bg);color:var(--bad)}
+.clock{display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px 0 2px}
+.go{width:172px;height:172px;border-radius:50%;border:0;background:var(--matcha);color:var(--on-matcha);font:800 22px/1.15 var(--serif);cursor:pointer;box-shadow:0 0 0 12px var(--halo);transition:transform .12s}
+.go:active{transform:scale(.97)}.go.out{background:var(--shu);color:var(--on-shu);box-shadow:0 0 0 12px var(--halo2)}
+.go:disabled{background:var(--soft);color:var(--mute);box-shadow:none;font-size:18px}
+.msg{min-height:22px;color:var(--mute);text-align:center;font-size:14px;max-width:36ch}.msg.ok{color:var(--ok)}.msg.bad{color:var(--warn)}
+#stk{display:block;width:140px;max-width:50%;height:auto}#stk[hidden]{display:none}
+.locb{padding:12px;border:1px solid var(--warn);border-radius:10px;color:var(--warn);background:var(--warn-bg);font-size:13.5px}
+.week{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.week::-webkit-scrollbar{display:none}
+.day{flex:0 0 76px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 10px;display:grid;gap:1px}
+.day span{font-size:11px;color:var(--mute)}.day b{font-size:13px;overflow-wrap:anywhere;font-family:var(--serif)}.day small{font-size:11px;color:var(--mute)}
+.day.t{border-color:var(--matcha);box-shadow:inset 0 0 0 1px var(--matcha)}.day.off b{color:var(--mute)}
+.req{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-top:1px solid var(--line)}.req:first-of-type{border-top:0;padding-top:0}
+.req .h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.inbox{border-color:var(--shu);box-shadow:inset 4px 0 0 var(--shu)}
+.foot{text-align:center;color:var(--mute);font-size:12px}
+#cm{position:fixed;inset:0;background:#000;z-index:9;display:flex;flex-direction:column}#cm[hidden]{display:none}
+#vid{flex:1;min-height:0;width:100%;object-fit:cover}#vid.me{transform:scaleX(-1)}
+#cmt{color:#fff;text-align:center;padding:10px 16px 0;font-size:14px}
+.cbar{display:flex;gap:12px;padding:14px 16px max(16px,env(safe-area-inset-bottom))}.cbar .btn{flex:1}
+[hidden]{display:none!important}
+</style></head><body><div class="app">
+<div class="top"><div class="logo" role="img" aria-label="Kurogi"></div><button class="link" id="so" hidden>Sign out</button></div>
+
+<div id="login" class="card" hidden>
+  <h1>Absen</h1><div class="sub" style="margin-top:4px">Sign in with your login name and the 4-digit PIN from your manager.</div>
+  <label class="f" for="n">Login name</label><input id="n" autocomplete="username" autocapitalize="none">
+  <label class="f" for="p">PIN</label><input id="p" inputmode="numeric" maxlength="4" type="password" autocomplete="current-password">
+  <button class="btn p w" id="in">Sign in</button><div class="msg bad" id="lm" style="margin:10px auto 0"></div>
+</div>
+
+<div id="main" hidden style="display:flex;flex-direction:column;gap:14px">
+  <div class="hello"><small id="greet"></small><h1 id="hi"></h1></div>
+  <div class="card inbox" id="inbox" hidden></div>
+  <div class="card">
+    <div class="today"><span class="eyebrow">Today</span><b id="tcode"></b><em id="ttime"></em><span class="chip loc" id="tloc"></span></div>
+    <div class="clock">
+      <span class="chip" id="state" hidden></span>
+      <button class="go" id="go"></button>
+      <div class="msg" id="msg"></div>
+      <button class="btn" id="qrb" hidden>Scan the counter QR code</button>
+      <img id="stk" hidden alt="">
+    </div>
+    <div class="locb" id="locb" hidden><div id="loct"></div><button class="btn" id="lock" style="margin-top:8px">Turn on location</button></div>
+  </div>
+  <div><div class="eyebrow" style="margin:0 0 8px">Next 7 days</div><div class="week" id="week"></div></div>
+  <div class="row2"><button class="btn" id="swb">Swap a shift</button><button class="btn" id="lvb">Request leave</button></div>
+
+  <div class="card" id="swf" hidden>
+    <h2>Swap a shift</h2>
+    <div class="sub">Your colleague must accept first<span id="swrule"></span>.</div>
+    <label class="f" for="sd">Your shift</label><select id="sd"></select>
+    <label class="f" for="sw">Swap with</label><select id="sw"></select>
+    <label class="f" for="so2">What happens</label><select id="so2"></select>
+    <label class="f" for="sn">Note (optional)</label><input id="sn" maxlength="120" placeholder="e.g. family event">
+    <div class="msg bad" id="swm" style="margin:10px auto 0"></div>
+    <div class="row2" style="margin-top:6px"><button class="btn" id="swx">Close</button><button class="btn p" id="sws">Send request</button></div>
+  </div>
+
+  <div class="card" id="lvf" hidden>
+    <h2>Request annual leave</h2>
+    <div class="sub">Your manager approves it. Approved leave is paid.</div>
+    <label class="f" for="lf">From</label><input type="date" id="lf">
+    <label class="f" for="lt">To</label><input type="date" id="lt">
+    <label class="f" for="ln">Note (optional)</label><input id="ln" maxlength="120">
+    <div class="msg bad" id="lvm" style="margin:10px auto 0"></div>
+    <div class="row2" style="margin-top:6px"><button class="btn" id="lvx">Close</button><button class="btn p" id="lvs">Send request</button></div>
+  </div>
+
+  <div class="card" id="reqs" hidden><h2>My requests</h2><div id="reql"></div></div>
+  <div class="foot">A selfie is taken when you clock in. Your location is checked at clock-in and clock-out.</div>
+</div>
+</div>
+<div id="cm" hidden><div id="cmt"></div><video id="vid" autoplay playsinline muted></video><div class="cbar"><button class="btn" id="cc">Cancel</button><button class="btn p" id="snap">Take photo</button></div></div>
+<script>
+const $=s=>document.querySelector(s),L=localStorage;
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const cap=s=>String(s||'').replace(/(^|\s)\S/g,c=>c.toUpperCase());
+const slug=n=>n.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const hdr=()=>({'content-type':'application/json','x-user':L.getItem('u')||'','x-pin':L.getItem('p')||''});
+const api=(p,b)=>fetch(p,b?{method:'POST',headers:hdr(),body:JSON.stringify(b)}:{headers:hdr()}).then(async r=>({ok:r.ok,status:r.status,j:await r.json().catch(()=>({}))}));
+const WHY={outside_office:'you were outside the restaurant area',low_accuracy:'GPS was not accurate',impossible_travel:'location jumped too far',no_location:'location was blocked',no_selfie:'no selfie was taken',no_shift_today:'no shift is scheduled today',no_qr:'the counter QR code was not scanned'};
+const fmt=d=>new Date(d+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+// QR code from the counter tablet: arrives in the link (?qr=...) or from the in-page scanner. Valid for 2 minutes.
+let qr='',qrAt=0;
+(()=>{const q=new URLSearchParams(location.search).get('qr');if(q){qr=q;qrAt=Date.now();history.replaceState(null,'',location.pathname)}})();
+const qrNow=()=>Date.now()-qrAt<110000?qr:'';
+
+let locErr='';
+function getPos(){
+  return new Promise(res=>{
+    if(!navigator.geolocation){locErr='unsupported';return res(null)}
+    const go=(hi,next)=>navigator.geolocation.getCurrentPosition(p=>{locErr='';res(p.coords)},e=>{
+      if(e.code===1){locErr='denied';res(null)}else if(next)next();else{locErr=e.code===3?'timeout':'unavailable';res(null)}
+    },{enableHighAccuracy:hi,timeout:10000,maximumAge:0});
+    go(true,()=>go(false,null));
+  });
+}
+const TIP={denied:'Allow location for this site. iPhone: Settings > Privacy & Security > Location Services > Safari Websites > While Using the App. Android: tap the lock icon next to the address > Permissions. Then reload the page.',timeout:'Move near a window or outdoors, make sure Location Services is on, and try again.',unavailable:'Make sure Location Services is on, then try again. If you opened this link inside WhatsApp or another app, open it in Safari or Chrome instead.',unsupported:'This browser cannot share location. Open the link in Safari or Chrome.'};
+let open=false,asked=false,me=null,sw=null;
+async function askLoc(){const c=await getPos();$('#locb').hidden=!!c;if(!c)$('#loct').textContent='Location is off, so you cannot clock in or out yet. '+TIP[locErr||'unavailable'];return c}
+function greet(){const h=new Date().getHours();return h<11?'Good morning':h<15?'Good afternoon':h<19?'Good evening':'Good night'}
+
+async function load(){
+  const r=await api('/api/me');
+  if(!r.ok){$('#main').hidden=true;$('#login').hidden=false;$('#so').hidden=true;return false}
+  const m=me=r.j;$('#login').hidden=true;$('#main').hidden=false;$('#so').hidden=false;open=m.open;
+  $('#greet').textContent=greet();$('#hi').textContent='Hi, '+cap(m.name.split(' ')[0]);
+  const t=m.week[0],work=t.code&&t.code!=='OFF';
+  $('#tcode').textContent=t.leave?'Annual leave':work?t.code:'Day off';$('#ttime').textContent=work&&!t.leave?`${t.start} – ${t.end}`:'No shift today';
+  $('#tloc').textContent=m.place||'';$('#tloc').hidden=!m.place;
+  const done=m.today&&m.today.out&&!m.open;
+  const st=$('#state');st.hidden=!(m.open||done);
+  if(m.open){st.className='chip ok';st.textContent='Clocked in'+(m.today&&m.today.in?' · '+m.today.in:'')}
+  else if(done){st.className='chip';st.textContent='Done · '+m.today.out}
+  const k=done?'thank_u':m.open?'kopi':'',sk=$('#stk');sk.hidden=!k;if(k){sk.src='/img/'+k+'.webp';sk.alt=k==='kopi'?'Hemm... kopi dulu?':'Terima kasih'}
+  $('#go').textContent=done?'See you tomorrow':m.open?'Clock out':'Clock in';$('#go').disabled=!!done;$('#go').className='go'+(m.open?' out':'');
+  $('#week').innerHTML=m.week.map((d,i)=>{const w=d.code&&d.code!=='OFF';return `<div class="day${i?'':' t'}${w||d.leave?'':' off'}"><span>${i?new Date(d.date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric'}):'Today'}</span><b>${d.leave?'Leave':w?esc(d.code):d.code?'OFF':'–'}</b>${w&&!d.leave?`<small>${d.start}–${d.end}</small>`:''}</div>`}).join('');
+  if(!asked){asked=true;askLoc()}
+  loadReqs();
+  return true;
+}
+
+// ---------- requests: swaps and leave ----------
+const SST={waiting:['warn','Waiting for colleague'],accepted:['warn','Waiting for manager'],approved:['ok','Approved'],declined:['bad','Declined'],rejected:['bad','Rejected by manager'],cancelled:['','Cancelled'],expired:['','Expired']};
+function swapText(s){
+  const you=s.mine,other=cap(you?s.bL:s.aL);
+  if(s.kind==='give')return you?`You give your ${esc(s.cA)} shift on ${fmt(s.dA)} to ${esc(other)}`:`${esc(other)} gives you their ${esc(s.cA)} shift on ${fmt(s.dA)}`;
+  if(s.kind==='same')return you?`${fmt(s.dA)}: you take ${esc(other)}'s ${esc(s.cB)}, they take your ${esc(s.cA)}`:`${fmt(s.dA)}: you take ${esc(other)}'s ${esc(s.cA)}, they take your ${esc(s.cB)}`;
+  return you?`You give ${esc(s.cA)} on ${fmt(s.dA)} to ${esc(other)} and take their ${esc(s.cB)} on ${fmt(s.dB)}`:`You take ${esc(other)}'s ${esc(s.cA)} on ${fmt(s.dA)} and give them your ${esc(s.cB)} on ${fmt(s.dB)}`;
+}
+async function loadReqs(){
+  const[a,b]=await Promise.all([api('/api/swap'),api('/api/leave')]);
+  if(!a.ok)return;sw=a.j;
+  const inc=sw.swaps.filter(s=>s.forMe&&s.status==='waiting');
+  $('#inbox').hidden=!inc.length;
+  $('#inbox').innerHTML=`<h2>Swap request${inc.length>1?'s':''} for you</h2>`+inc.map(s=>`<div class="req"><div><b>${esc(cap(s.aL))}</b> asks:</div><div>${swapText(s)}</div>${s.note?`<div class="sub">“${esc(s.note)}”</div>`:''}<div class="row2"><button class="btn r" data-sd="${s.uid}">Decline</button><button class="btn p" data-sa="${s.uid}">Accept</button></div><div class="msg bad" id="im-${s.uid}"></div></div>`).join('');
+  const mine=sw.swaps.filter(s=>!(s.forMe&&s.status==='waiting')),lv=b.ok?b.j.list:[];
+  const items=[...mine.map(s=>({at:s.at,html:`<div class="req"><div class="h"><span>${swapText(s)}</span><span class="chip ${SST[s.status][0]}">${s.status==='waiting'&&s.mine?'Waiting for '+esc(cap(s.bL)):SST[s.status][1]}</span></div>${s.mine&&['waiting','accepted'].includes(s.status)?`<div class="row2"><button class="btn" data-sc="${s.uid}">Cancel request</button>${s.status==='waiting'?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`Hi ${cap(s.bL)}, I sent you a shift swap request in Absen Kurogi: ${swapText(s).replace(/&#?\w+;/g,'')}. Please open ${location.origin} to accept or decline. Thank you!`)}">Tell on WhatsApp</a>`:''}</div>`:''}</div>`})),
+    ...lv.map(r=>({at:r.at,html:`<div class="req"><div class="h"><span>Annual leave ${r.from===r.to?fmt(r.from):fmt(r.from)+' – '+fmt(r.to)}</span><span class="chip ${({waiting:'warn',approved:'ok',rejected:'bad'})[r.status]}">${({waiting:'Waiting for manager',approved:'Approved',rejected:'Rejected'})[r.status]}</span></div>${r.status==='waiting'?`<div class="row2"><button class="btn" data-lc="${r.uid}">Cancel request</button></div>`:''}</div>`}))].sort((x,y)=>y.at-x.at);
+  $('#reqs').hidden=!items.length;$('#reql').innerHTML=items.map(x=>x.html).join('');
+}
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-sa],[data-sd],[data-sc],[data-lc]');if(!t)return;
+  t.disabled=true;
+  let r;
+  if(t.dataset.sa)r=await api('/api/swap',{action:'accept',uid:t.dataset.sa});
+  else if(t.dataset.sd)r=await api('/api/swap',{action:'decline',uid:t.dataset.sd});
+  else if(t.dataset.sc)r=await api('/api/swap',{action:'cancel',uid:t.dataset.sc});
+  else r=await api('/api/leave',{action:'cancel',uid:t.dataset.lc});
+  if(!r.ok){t.disabled=false;const m=document.getElementById('im-'+(t.dataset.sa||t.dataset.sd));if(m)m.textContent=r.j.error;else alert(r.j.error);return}
+  await load();
+});
+
+// Swap form
+function swapOptions(){
+  const dA=$('#sd').value,c=$('#sw').value,o=$('#so2');o.innerHTML='';$('#sws').disabled=true;
+  if(!dA||!c||!sw.other)return;
+  const mine=Object.fromEntries(sw.days.map(d=>[d.date,d])),theirs=Object.fromEntries(sw.other.map(d=>[d.date,d.code])),myCode=mine[dA].code,off=x=>!x||x==='OFF',opts=[];
+  if(off(theirs[dA]))opts.push([`give|`,`I give my ${myCode} shift to them (they are off that day)`]);
+  else if(theirs[dA]!==myCode)opts.push([`same|${dA}`,`Same day: I take their ${theirs[dA]}, they take my ${myCode}`]);
+  if(off(theirs[dA]))sw.other.forEach(d=>{if(d.date!==dA&&d.date>ymd(new Date())&&!off(d.code)&&mine[d.date]&&off(mine[d.date].code)&&!mine[d.date].leave)opts.push([`trade|${d.date}`,`I also take their ${d.code} on ${fmt(d.date)}`])});
+  o.innerHTML=opts.length?opts.map(([v,l])=>`<option value="${v}">${esc(l)}</option>`).join(''):'<option value="">No swap possible with this person on that day</option>';
+  $('#sws').disabled=!opts.length;
+}
+async function loadOther(){sw.other=null;swapOptions();const c=$('#sw').value;if(!c)return;const r=await api('/api/swap?with='+encodeURIComponent(c));if(r.ok&&$('#sw').value===c){sw.other=r.j.days;swapOptions()}}
+$('#swb').onclick=()=>{
+  if(!sw)return;$('#lvf').hidden=true;$('#swf').hidden=false;$('#swm').textContent='';
+  $('#swrule').textContent=(sw.rules.auto?'':', then your manager approves it')+(sw.rules.hours?`. Swaps close ${sw.rules.hours} hours before the shift starts`:'');
+  const days=sw.days.filter(d=>d.code&&d.code!=='OFF'&&!d.leave);
+  $('#sd').innerHTML=days.length?days.map(d=>`<option value="${d.date}">${fmt(d.date)} · ${esc(d.code)}${d.start?' '+d.start+'–'+d.end:''}</option>`).join(''):'<option value="">You have no shifts in the next 2 weeks</option>';
+  $('#sw').innerHTML='<option value="">Choose a colleague</option>'+sw.colleagues.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  sw.other=null;swapOptions();$('#swf').scrollIntoView({behavior:'smooth',block:'start'});
+};
+$('#sd').onchange=swapOptions;$('#sw').onchange=loadOther;$('#swx').onclick=()=>{$('#swf').hidden=true};
+$('#sws').onclick=async()=>{
+  const[kind,dB]=$('#so2').value.split('|');if(!kind)return;
+  $('#sws').disabled=true;$('#swm').textContent='';
+  const r=await api('/api/swap',{action:'create',dA:$('#sd').value,with:$('#sw').value,dB:kind==='give'?null:dB,note:$('#sn').value});
+  if(!r.ok){$('#swm').textContent=r.j.error;$('#sws').disabled=false;return}
+  $('#swf').hidden=true;$('#sn').value='';await loadReqs();$('#reqs').scrollIntoView({behavior:'smooth',block:'start'});
+};
+// Leave form
+$('#lvb').onclick=()=>{$('#swf').hidden=true;$('#lvf').hidden=false;$('#lvm').textContent='';const t=ymd(new Date());$('#lf').min=$('#lt').min=t;if(!$('#lf').value)$('#lf').value=$('#lt').value=t;$('#lvf').scrollIntoView({behavior:'smooth',block:'start'})};
+$('#lf').onchange=()=>{if($('#lt').value<$('#lf').value)$('#lt').value=$('#lf').value};
+$('#lvx').onclick=()=>{$('#lvf').hidden=true};
+$('#lvs').onclick=async()=>{
+  $('#lvs').disabled=true;const r=await api('/api/leave',{action:'create',from:$('#lf').value,to:$('#lt').value,note:$('#ln').value});$('#lvs').disabled=false;
+  if(!r.ok){$('#lvm').textContent=r.j.error;return}
+  $('#lvf').hidden=true;$('#ln').value='';await loadReqs();
+};
+
+// ---------- sign in / out ----------
+$('#in').onclick=async()=>{L.setItem('u',slug($('#n').value));L.setItem('p',$('#p').value.trim());if(!await load())$('#lm').textContent='Wrong name or PIN. After 5 wrong tries, wait 15 minutes.'};
+$('#so').onclick=()=>{L.clear();location.reload()};
+$('#n').onkeydown=$('#p').onkeydown=e=>{if(e.key==='Enter')$('#in').click()};
+
+// ---------- clock in / out ----------
+const say=(t,c='')=>{$('#msg').className='msg '+c;$('#msg').textContent=t};
+$('#go').onclick=async()=>{
+  $('#go').disabled=true;say('Checking location…');$('#qrb').hidden=true;
+  const c=await askLoc();
+  if(!c){$('#go').disabled=false;say('Location not detected, so you cannot clock '+(open?'out':'in')+'.','bad');return}
+  const w=await fetch('/api/where',{method:'POST',headers:hdr(),body:JSON.stringify({type:open?'out':'in',lat:c.latitude,lng:c.longitude,accuracy:c.accuracy,qr:qrNow()})}).then(r=>r.json()).catch(()=>({}));
+  if(w.error){$('#go').disabled=false;say(w.error,'bad');if(w.needQr)$('#qrb').hidden=false;return}
+  if(open)return doClock(null,c);
+  say('');
+  const p=await camera('selfie');
+  if(p==='denied'){$('#go').disabled=false;say('The camera is needed to clock in. Allow camera access in your browser settings.','bad');return}
+  if(p)doClock(p,c);else $('#go').disabled=false;
+};
+let jsqr;
+function loadJsQR(){return jsqr||(jsqr=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';s.onload=()=>res(window.jsQR);s.onerror=rej;document.head.appendChild(s)}))}
+$('#qrb').onclick=async()=>{
+  const code=await camera('qr');
+  if(code==='denied'){say('Allow camera access to scan the QR code.','bad');return}
+  if(!code)return;
+  const m=String(code).match(/[?&]qr=([^&#\s]+)/);
+  if(!m){say('That is not the counter QR code. Try again.','bad');return}
+  qr=decodeURIComponent(m[1]);qrAt=Date.now();$('#qrb').hidden=true;say('QR code scanned. Tap Clock in.','ok');
+};
+// mode 'selfie': returns a JPEG data URL. mode 'qr': returns the text in the QR code.
+async function camera(mode){
+  let st,scan=null;
+  if(mode==='qr')try{scan=await loadJsQR()}catch(e){say('Could not load the QR scanner. Check your internet and try again.','bad');return null}
+  try{st=await navigator.mediaDevices.getUserMedia({video:mode==='qr'?{facingMode:{ideal:'environment'}}:{facingMode:'user',width:{ideal:720},height:{ideal:720}},audio:false})}catch(e){return 'denied'}
+  const v=$('#vid');v.srcObject=st;v.className=mode==='qr'?'':'me';$('#cm').hidden=false;$('#snap').hidden=mode==='qr';
+  $('#cmt').textContent=mode==='qr'?'Point the camera at the QR code on the counter tablet':'';
+  return new Promise(res=>{
+    let alive=true;
+    const done=r=>{alive=false;st.getTracks().forEach(t=>t.stop());v.srcObject=null;$('#cm').hidden=true;res(r)};
+    $('#cc').onclick=()=>done(null);
+    if(mode==='qr'){
+      const c=document.createElement('canvas'),x=c.getContext('2d',{willReadFrequently:true});
+      const tick=()=>{if(!alive)return;if(v.videoWidth){const s=Math.min(1,640/Math.max(v.videoWidth,v.videoHeight));c.width=v.videoWidth*s|0;c.height=v.videoHeight*s|0;x.drawImage(v,0,0,c.width,c.height);const q=scan(x.getImageData(0,0,c.width,c.height).data,c.width,c.height);if(q&&q.data)return done(q.data)}requestAnimationFrame(tick)};
+      tick();return;
+    }
+    $('#snap').onclick=()=>{
+      if(!v.videoWidth)return;
+      const s=400/Math.max(v.videoWidth,v.videoHeight),c=document.createElement('canvas');
+      c.width=Math.round(v.videoWidth*s);c.height=Math.round(v.videoHeight*s);
+      c.getContext('2d').drawImage(v,0,0,c.width,c.height);
+      done(c.toDataURL('image/jpeg',.7));
+    };
+  });
+}
+async function doClock(photo,c){
+  $('#go').disabled=true;say('Saving…');
+  const r=await fetch('/api/clock',{method:'POST',headers:hdr(),body:JSON.stringify({type:open?'out':'in',lat:c&&c.latitude,lng:c&&c.longitude,accuracy:c&&c.accuracy,photo,qr:qrNow()})});
+  const j=await r.json();
+  if(!r.ok)say(j.error,'bad');
+  else if(j.status==='review')say('Recorded. Your manager will check it because '+j.reasons.map(x=>WHY[x]||x).join(', ')+'.','bad');
+  else say(j.late>0?`Recorded. You are ${j.late} min late.`:'Recorded. Thank you!','ok');
+  await load();
+}
+$('#lock').onclick=askLoc;
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!$('#main').hidden){askLoc();loadReqs()}});
+load().then(ok=>{if(ok&&qrNow())say('QR code scanned. Tap Clock in.','ok')});
+</script></body></html>
