@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Absen admin · Kurogi</title>
+<link rel="icon" type="image/png" href="/img/favicon.png"><link rel="apple-touch-icon" href="/img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Shippori+Mincho:wght@600;800&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="/slip-pdf.js"></script>
+<script src="/admin-i18n.js"></script>
+<style>
+:root{--paper:#F6F1E7;--card:#FFFDF8;--ink:#2B2A24;--mute:#7B7666;--line:#E4DCCB;--soft:#F1EBDD;--matcha:#4E6B3A;--on-matcha:#FFFDF8;--shu:#B33A2B;--on-shu:#FFFDF8;
+--ok-bg:#E2EBD5;--ok:#3B5A27;--warn-bg:#F6E2C8;--warn:#8A4B12;--bad-bg:#F5D9D3;--bad:#8E2A1E;--wa:#1F8A4C;
+--serif:'Shippori Mincho','Hiragino Mincho ProN','Yu Mincho',Georgia,serif;--sans:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif}
+@media(prefers-color-scheme:dark){:root{--paper:#1B1D18;--card:#24271F;--ink:#EEE9DC;--mute:#A8A290;--line:#363A2E;--soft:#2C3026;--matcha:#8DB36E;--on-matcha:#17190F;--shu:#E0745F;--on-shu:#1B1D18;
+--ok-bg:#2B3A22;--ok:#B5D69A;--warn-bg:#3C2F1C;--warn:#F0C27F;--bad-bg:#40231E;--bad:#F2A496;--wa:#3DBE72;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans)}
+.app{max-width:980px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 48px max(16px,env(safe-area-inset-left))}
+.logo{display:block;aspect-ratio:723/270;background:var(--ink);-webkit-mask:url(/img/kurogi.png) center/contain no-repeat;mask:url(/img/kurogi.png) center/contain no-repeat}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;font-size:12px;font-weight:700}.lang button{border:0;background:none;color:var(--mute);font:inherit;padding:6px 10px;cursor:pointer}.lang button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.brand{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}.brand .logo{width:92px;flex:none}
+.brand h1{margin:0;font:800 20px/1.2 var(--serif)}.who{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--mute)}
+h2{font:800 18px/1.3 var(--serif);margin:0 0 6px}h3{font:800 15px/1.3 var(--serif);margin:16px 0 6px}
+.sub{color:var(--mute);font-size:13px;max-width:75ch}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;color:var(--mute);font:inherit;font-weight:700;font-size:14px;padding:8px 16px;border-radius:999px;cursor:pointer}
+.tabs button.on{background:var(--matcha);color:var(--on-matcha)}
+.badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:6px;border-radius:99px;background:var(--shu);color:var(--on-shu);font-size:11.5px;line-height:20px;text-align:center}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}.grid2>.card{margin:0}
+label.f{display:block;font-size:12px;color:var(--mute);margin-top:10px;font-weight:600}
+select,input,textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);margin:6px 0}
+input[type=checkbox]{width:auto;margin:0 8px 0 0;accent-color:var(--matcha)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--matcha);outline-offset:1px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:700;font-size:14px;padding:8px 15px;border-radius:999px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn.p{background:var(--matcha);border-color:var(--matcha);color:var(--on-matcha)}.btn.ok{background:var(--matcha);border-color:var(--matcha);color:var(--on-matcha)}
+.btn.no{color:var(--shu);border-color:var(--shu);background:transparent}.btn.wa{background:var(--wa);border-color:var(--wa);color:#fff}
+.btn.s{padding:4px 11px;font-size:12.5px}.btn:disabled{opacity:.45;cursor:default}
+.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.chip{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--soft);color:var(--mute);white-space:nowrap}
+.chip.ok{background:var(--ok-bg);color:var(--ok)}.chip.warn{background:var(--warn-bg);color:var(--warn)}.chip.bad{background:var(--bad-bg);color:var(--bad)}
+.item{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;padding:14px 0;border-top:1px solid var(--line)}.item:first-of-type{border-top:0}
+.item .g{flex:1 1 240px;min-width:0}
+.why{color:var(--warn);font-weight:700;font-size:13.5px}.good{color:var(--ok);font-weight:700}.bad{color:var(--bad);font-weight:700}
+.pics{display:flex;gap:10px;flex-wrap:wrap}.pics figure{margin:0;display:grid;gap:4px;font-size:11.5px;color:var(--mute)}
+img.s{width:180px;max-width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;cursor:zoom-in;display:block;background:var(--soft)}
+.noref{width:180px;max-width:100%;aspect-ratio:1;border-radius:10px;border:1px dashed var(--line);display:grid;place-items:center;text-align:center;padding:10px;color:var(--mute);font-size:12px}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:50;cursor:zoom-out}#lb img{max-width:92vw;max-height:88vh;border-radius:12px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:520px;font-size:14px}th,td{text-align:left;padding:9px 8px;border-top:1px solid var(--line);white-space:nowrap;vertical-align:middle}th{border-top:0;color:var(--mute);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.errs{color:var(--bad);font-size:13.5px;margin:8px 0}
+details summary{cursor:pointer;color:var(--mute);font-weight:600;font-size:13.5px;margin-top:8px}
+.kl{display:flex;gap:6px;align-items:center}.kl input{margin:0;font-size:12.5px}
+#sv{position:fixed;inset:0;background:rgba(27,29,24,.72);z-index:60;overflow:auto;padding:max(16px,env(safe-area-inset-top)) 12px 28px}.sv-in{max-width:680px;margin:0 auto}
+.ps-paper{background:#FFFDF8;color:#2B2A24;border-radius:6px;padding:30px 28px 24px}.ps-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding-bottom:16px;border-bottom:1.5px solid #2B2A24}.ps-top img{height:38px;display:block}
+.ps-ttl{text-align:right}.ps-ttl b{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#7B7666}.ps-ttl span{font:800 20px/1.3 var(--serif)}.ps-ttl span.ps-state{font:700 11px/1.5 var(--sans)}
+.ps-state{display:inline-block;margin-top:4px;font-size:11px;font-weight:700;border-radius:99px;padding:2px 10px}.ps-state.d{background:#F6E2C8;color:#8A4B12}.ps-state.v{background:#E2EBD5;color:#3B5A27}
+.ps-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;margin:18px 0}.ps-meta small,.ps-row small{display:block;color:#7B7666;font-size:11.5px}.ps-meta b{font-weight:700}
+.ps-paper h4{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#7B7666;margin:20px 0 4px}.ps-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #E4DCCB}.ps-row span:last-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+.ps-net{display:flex;justify-content:space-between;align-items:baseline;margin-top:20px;padding:15px 18px;background:#4E6B3A;color:#FFFDF8;border-radius:6px}.ps-net span{font-size:12px;letter-spacing:.12em;text-transform:uppercase}.ps-net b{font-size:24px;font-variant-numeric:tabular-nums}.ps-foot{margin-top:14px;color:#7B7666;font-size:12.5px}
+.ps-act{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.ps-help{color:#EEE9DC;margin-top:10px;font-size:13px}
+[hidden]{display:none!important}
+</style></head><body><div class="app">
+<div class="brand"><div class="logo" role="img" aria-label="Kurogi"></div><h1>Absen admin</h1><div class="who"><div class="lang" role="group" aria-label="Language / Bahasa"><button data-alang="en">EN</button><button data-alang="id">ID</button></div><span id="whoi" hidden><span id="whon" class="notr"></span> <button class="btn s" id="out">Sign out</button></span></div></div>
+<div class="card" id="lg" style="max-width:420px">
+  <h2>Sign in</h2><div class="sub">Owner: leave the username empty and use the owner password. HR and managers: use your own username.</div>
+  <label class="f" for="un">Username</label><input id="un" autocomplete="username" autocapitalize="none" placeholder="(empty for owner)">
+  <label class="f" for="pw">Password</label><input id="pw" type="password" autocomplete="current-password">
+  <div class="acts"><button class="btn p" id="go">Sign in</button></div><div class="errs" id="le"></div>
+</div>
+<div id="app" hidden>
+<div class="tabs"><button data-t="rev">Review<span class="badge" id="rvb" hidden></span></button><button data-t="day">Today</button><button data-t="sch">Schedule</button><button data-t="pay" data-area="pay">Payroll</button><button data-t="set" data-area="setup">Setup</button></div>
+<div id="v"></div></div></div>
+<div id="lb" hidden><img id="lbi" alt="Selfie"></div>
+<div id="sv" hidden><div class="sv-in" id="svb"></div></div>
+<script>
+const $=s=>document.querySelector(s),SS=sessionStorage;
+let ME=null;
+const can=a=>ME&&(ME.role==='owner'||(ME.role==='hr'&&a!=='admins')||(ME.role==='manager'&&a==='ops'));
+async function api(p,o={}){
+  const r=await fetch(p,{...o,headers:{'content-type':'application/json','x-admin':SS.getItem('tok')||''}});
+  const j=await r.json().catch(()=>({}));
+  if(r.status===401){signedOut('Your sign-in ended. Please sign in again.');throw Error('signed out')}
+  return{ok:r.ok,j};
+}
+const post=(p,b)=>api(p,{method:'POST',body:JSON.stringify(b)});
+const WHY={outside_office:'Outside the restaurant area',low_accuracy:'Low GPS accuracy',impossible_travel:'Impossible travel',no_location:'Location blocked',no_selfie:'No selfie',no_shift_today:'No shift scheduled',no_clock_out:'Missed clock-out',auto_clock_out:'Auto clock-out',early_clock_out:'Clocked out early',no_qr:'QR code not scanned (beta)'};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const rpf=n=>'Rp '+Math.round(n).toLocaleString('id-ID');
+const fmt=d=>new Date(d+'T00:00:00').toLocaleDateString(ALOC(),{weekday:'short',day:'numeric',month:'short'});
+const when=t=>new Date(t).toLocaleString(ALOC(),{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const msgOk=t=>`<p class="good">${esc(t)}</p>`,msgErr=t=>`<div class="errs">${esc(t)}</div>`;
+// The PDF writer and payslip helpers are in /slip-pdf.js
+
+// ---------- payslips: viewer, PDF, WhatsApp ----------
+const slipStore=new Map();
+const sFmt=d=>new Date(d+'T00:00:00').toLocaleDateString(ALOC(),{day:'numeric',month:'short'});
+function openSlip(key){
+  const e=slipStore.get(key);if(!e)return;const s=e.s,m=slipMeta(s),ok=s.state==='verified';
+  const line=x=>`<div class="ps-row"><span>${esc(x.l)}${x.n?`<small>${esc(x.n)}</small>`:''}</span><span>${rpf(x.a)}</span></div>`;
+  const canShare=!!(navigator.canShare&&navigator.canShare({files:[new File(['x'],'a.pdf',{type:'application/pdf'})]}));
+  $('#svb').innerHTML=`<div class="ps-paper"><div class="ps-top"><img src="/img/kurogi.png" alt="Kurogi"><div class="ps-ttl"><b>Slip gaji</b><span>${esc(m.period)}</span><br><span class="ps-state ${ok?'v':'d'}">${atr(ok?'Verified':s.state==='changed'?'Changed since verified · draft':'Draft · not verified')}</span></div></div>
+  <div class="ps-meta"><div><small>Nama karyawan</small><b>${esc(s.name)}</b></div><div><small>Jenis gaji</small><b>${PTYPE_ID[s.type]||esc(s.type)}</b></div><div><small>Periode</small><b>${esc(m.period)}</b></div><div><small>Tanggal terbit</small><b>${esc(m.issued)}</b></div></div>
+  <h4>Pendapatan</h4>${s.earnings.map(line).join('')}<h4>Potongan</h4>${s.deductions.length?s.deductions.map(line).join(''):'<div class="ps-row"><span>Tidak ada</span><span>-</span></div>'}
+  <div class="ps-net"><span>Gaji bersih diterima</span><b>${rpf(s.net)}</b></div><div class="ps-foot">${esc(m.att)}${ok?'<br><b>'+esc(verLine(s.ver))+'</b>':''}</div></div>
+  <div class="ps-act">${ok?`<button class="btn p" id="spd">Download PDF</button>${canShare?'<button class="btn" id="sps">Share PDF</button>':''}${waLink(s,e.tag,e.per,e.tpl)}${s.share?'<button class="btn" id="spl">Copy link</button>':''}`:''}<button class="btn" id="spc">Close</button></div>
+  <div class="ps-help">${ok?(s.share?`WhatsApp sends the person a private link to this payslip (works until ${idLong(s.shareUntil)}). They open it and tap Download PDF.${canShare?' Or tap Share PDF to send the file itself.':''}`:'This payslip was verified before private links existed. Un-verify and verify it again to make a link.'):'Tick this person and press Verify in the Payroll tab before sending. Only verified payslips can be downloaded or sent.'}</div>`;
+  $('#sv').hidden=false;
+  $('#spc').onclick=()=>{$('#sv').hidden=true};
+  if(!ok)return;
+  $('#spd').onclick=async()=>{const f=await slipPdf(e),u=URL.createObjectURL(f),a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),8000)};
+  const sl=$('#spl');if(sl)sl.onclick=async()=>{try{await navigator.clipboard.writeText(slipLink(s));sl.textContent='Copied'}catch(x){prompt('Copy this link:',slipLink(s))}};
+  const sb=$('#sps');if(sb)sb.onclick=async()=>{const f=await slipPdf(e);try{await navigator.share({files:[f],text:waFill(e.tpl,{name:s.greet||s.name,period:e.per,when:'sudah tersedia',link:slipLink(s)})})}catch(x){if(x.name!=='AbortError')alert('Could not open the share sheet. Use Download PDF instead.')}};
+}
+const waFill=(tpl,v)=>Object.entries(v).reduce((s,[k,x])=>s.split('{'+k+'}').join(x),tpl);
+function waLink(r,tag,period,tpl){
+  if(!r.phone)return '<span class="sub">no WhatsApp number</span>';
+  if(!r.share)return '<span class="sub">verify again to make a link</span>';
+  const msg=waFill(tpl,{name:r.greet||r.name,period,when:'sudah tersedia',link:slipLink(r)});
+  const sent=localStorage.getItem('wa:'+tag+':'+r.id);
+  return `<a class="btn wa s" href="https://wa.me/${r.phone}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener" data-wa="${tag}:${r.id}">${sent?'Sent ✓':'WhatsApp'}</a>`;
+}
+const waTo=(phone,text,label='WhatsApp')=>phone?`<a class="btn wa s" target="_blank" rel="noopener" href="https://wa.me/${phone}?text=${encodeURIComponent(text)}">${esc(label)}</a>`:'';
+const STATE={verified:['ok','Verified'],changed:['bad','Changed · verify again'],draft:['warn','Draft']};
+const stateChip=r=>r.pend?`<span class="chip bad">${r.pend} in Review</span>`:`<span class="chip ${STATE[r.state][0]}" title="${esc(verLine(r.ver))}">${STATE[r.state][1]}</span>`;
+
+const splitLoc=s=>String(s||'').split(/\s*(?:,|;|\||\/|&|\bdan\b|\band\b)\s*/i).map(x=>x.trim()).filter(Boolean);
+const slug=n=>String(n).toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+document.addEventListener('click',e=>{const sv=e.target.closest('[data-sv]');if(sv){openSlip(sv.dataset.sv);return}if(e.target.id==='sv'){$('#sv').hidden=true;return}const w=e.target.closest('[data-wa]');if(w){localStorage.setItem('wa:'+w.dataset.wa,'1');w.textContent='Sent ✓'}const i=e.target.closest('img.s');if(i){$('#lbi').src=i.src;$('#lb').hidden=false}else if(e.target.closest('#lb'))$('#lb').hidden=true});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){$('#lb').hidden=true;$('#sv').hidden=true;return}
+  // Enter in a text box presses the main (green) button of the same card
+  if(e.key==='Enter'&&e.target.tagName==='INPUT'&&!['checkbox','file','date','month','time'].includes(e.target.type)){
+    const b=e.target.closest('.card')&&e.target.closest('.card').querySelector('.btn.p');
+    if(b&&!b.disabled){e.preventDefault();b.click()}
+  }
+});
+
+// ---------- sign in ----------
+const ROLE={owner:'Owner',hr:'HR',manager:'Manager'};
+// Signed out after 5 hours without activity (the server ends the session too).
+const IDLE=5*3600e3,touch=()=>{try{SS.setItem('act',Date.now())}catch(e){}},idle=()=>Date.now()-Number(SS.getItem('act')||Date.now())>IDLE;
+['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,()=>{if(ME)touch()},{passive:true}));
+function idleCheck(){if(ME&&idle()){post('/api/admin/login',{action:'logout'}).catch(()=>{});signedOut('Signed out after 5 hours without activity. Please sign in again.')}}
+setInterval(idleCheck,60e3);document.addEventListener('visibilitychange',()=>{if(!document.hidden)idleCheck()});
+function signedOut(msg){SS.removeItem('tok');ME=null;$('#app').hidden=true;$('#whoi').hidden=true;$('#lg').hidden=false;$('#le').textContent=msg||''}
+function start(me){
+  ME=me;$('#lg').hidden=true;$('#app').hidden=false;$('#whoi').hidden=false;$('#whon').textContent=me.name===ROLE[me.role]?atr(me.name):`${me.name} · ${atr(ROLE[me.role])}`;
+  document.querySelectorAll('.tabs [data-area]').forEach(b=>b.hidden=!can(b.dataset.area));
+  show('rev');
+}
+$('#go').onclick=async()=>{
+  $('#le').textContent='';
+  const r=await fetch('/api/admin/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({user:$('#un').value,password:$('#pw').value})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){$('#le').textContent=j.error||'Could not sign in';return}
+  SS.setItem('tok',j.token);touch();$('#pw').value='';start(j);
+};
+$('#out').onclick=async()=>{await post('/api/admin/login',{action:'logout'}).catch(()=>{});signedOut('Signed out.')};
+(async()=>{if(!SS.getItem('tok'))return;if(idle()){signedOut('Signed out after 5 hours without activity. Please sign in again.');return}try{const{ok,j}=await post('/api/admin/login',{action:'me'});if(ok)start(j)}catch(e){}})();
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>show(b.dataset.t));
+document.querySelectorAll('[data-alang]').forEach(b=>b.onclick=()=>{setAdminLang(b.dataset.alang);if(ME)$('#whon').textContent=ME.name===ROLE[ME.role]?atr(ME.name):`${ME.name} · ${atr(ROLE[ME.role])}`;const on=document.querySelector('.tabs button.on');if(ME&&on)show(on.dataset.t)});
+document.querySelectorAll('[data-alang]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.alang===ALANG));document.documentElement.lang=ALANG;
+function show(t){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));$('#v').innerHTML='<div class="sub">Loading…</div>';({rev,day,sch,pay,set})[t]().catch(e=>{if(e.message!=='signed out')$('#v').innerHTML=msgErr(atr('Something went wrong:')+' '+e.message)})}
+
+// ---------- Review: swaps, leave requests, flagged clock-ins ----------
+const SWS={waiting:['warn','Waiting for colleague'],accepted:['warn','Needs your approval'],approved:['ok','Approved'],declined:['bad','Declined by colleague'],rejected:['bad','Rejected'],cancelled:['','Cancelled'],expired:['','Expired']};
+const tv=(s,v)=>Object.entries(v).reduce((a,[k,x])=>a.split('{'+k+'}').join(x),atr(s));
+function swapDesc(s){
+  const a=`<b>${esc(s.aN)}</b>`,b=`<b>${esc(s.bN)}</b>`;
+  if(s.kind==='give')return tv('{a} gives {c} on {d} to {b}',{a,b,c:esc(s.cA),d:fmt(s.dA)});
+  if(s.kind==='same')return tv('{d}: {a} ({x}) and {b} ({y}) exchange shifts',{d:fmt(s.dA),a,b,x:esc(s.cA),y:esc(s.cB)});
+  return tv("{a} gives {x} on {d} to {b}, and takes {n}'s {y} on {e}",{a,b,n:esc(s.bN),x:esc(s.cA),y:esc(s.cB),d:fmt(s.dA),e:fmt(s.dB)});
+}
+const swapDays=s=>s.dB&&s.dB!==s.dA?`${fmt(s.dA)} & ${fmt(s.dB)}`:fmt(s.dA);
+async function rev(){
+  const[a,b]=await Promise.all([api('/api/admin/requests'),api('/api/admin/review')]);
+  const R=a.j,C=b.j||[];
+  const need=R.swaps.filter(s=>s.status==='accepted'),wait=R.swaps.filter(s=>s.status==='waiting'),lvw=R.leave.filter(r=>r.status==='waiting');
+  const doneS=R.swaps.filter(s=>!['accepted','waiting'].includes(s.status)).slice(0,12),doneL=R.leave.filter(r=>r.status!=='waiting').slice(0,12);
+  const total=need.length+lvw.length+C.length;$('#rvb').hidden=!total;$('#rvb').textContent=total;
+  const swapNotify=s=>s.status==='approved'||s.status==='rejected'?[[s.aN,s.aPhone],[s.bN,s.bPhone]].map(([n,p])=>waTo(p,`Halo ${n.split(' ')[0]}, permintaan tukar shift (${swapDays(s)}) sudah ${s.status==='approved'?'DISETUJUI. Jadwal sudah diperbarui':'DITOLAK'}. Cek di ${location.origin}`,'Tell '+n.split(' ')[0])).join(''):'';
+  const leaveNotify=r=>r.status!=='waiting'?waTo(r.phone,`Halo ${r.show.split(' ')[0]}, permintaan cuti ${fmt(r.from)}${r.to!==r.from?' – '+fmt(r.to):''} sudah ${r.status==='approved'?'DISETUJUI':'DITOLAK'}.`,'Tell '+r.name.split(' ')[0]):'';
+  $('#v').innerHTML=`
+  <div class="card"><h2>Shift swaps</h2><div class="sub">Both employees have agreed to these. Approving changes the schedule; pay and late checks follow the new schedule.</div>
+  ${need.length?need.map(s=>`<div class="item"><div class="g">${swapDesc(s)}${s.note?`<div class="sub">“${esc(s.note)}”</div>`:''}<div class="sub">Asked ${when(s.at)} · accepted ${when(s.acceptedAt)}</div><div class="errs" id="se-${s.uid}"></div></div><div class="acts" style="margin:0"><button class="btn ok" data-sw="${s.uid}" data-d="approve">Approve</button><button class="btn no" data-sw="${s.uid}" data-d="reject">Reject</button></div></div>`).join(''):'<div class="sub" style="margin-top:8px">No swaps waiting for approval.</div>'}
+  ${wait.length?`<h3>Waiting for the colleague</h3>${wait.map(s=>`<div class="item"><div class="g">${swapDesc(s)}</div><span class="chip warn">Waiting for ${esc(s.bN.split(' ')[0])}</span></div>`).join('')}`:''}
+  ${doneS.length?`<details><summary>Recent swap decisions</summary>${doneS.map(s=>`<div class="item"><div class="g">${swapDesc(s)}<div class="sub">${s.decidedBy?'By '+esc(s.decidedBy)+' · ':''}${s.doneAt?when(s.doneAt):''}</div></div><div class="acts" style="margin:0"><span class="chip ${SWS[s.status][0]}">${SWS[s.status][1]}</span>${swapNotify(s)}</div></div>`).join('')}</details>`:''}</div>
+  <div class="card"><h2>Leave requests</h2>
+  ${lvw.length?lvw.map(r=>`<div class="item"><div class="g"><b>${esc(r.name)}</b> · ${fmt(r.from)}${r.to!==r.from?' – '+fmt(r.to):''}${r.note?`<div class="sub">“${esc(r.note)}”</div>`:''}<div class="sub">Asked ${when(r.at)}</div></div><div class="acts" style="margin:0"><button class="btn ok" data-lv="${r.uid}" data-d="approve">Approve (paid leave)</button><button class="btn no" data-lv="${r.uid}" data-d="reject">Reject</button></div></div>`).join(''):'<div class="sub" style="margin-top:8px">No leave requests waiting.</div>'}
+  ${doneL.length?`<details><summary>Recent leave decisions</summary>${doneL.map(r=>`<div class="item"><div class="g"><b>${esc(r.name)}</b> · ${fmt(r.from)}${r.to!==r.from?' – '+fmt(r.to):''}<div class="sub">${r.decidedBy?'By '+esc(r.decidedBy)+' · '+when(r.doneAt):''}</div></div><div class="acts" style="margin:0"><span class="chip ${r.status==='approved'?'ok':'bad'}">${r.status==='approved'?'Approved':'Rejected'}</span>${leaveNotify(r)}</div></div>`).join('')}</details>`:''}</div>
+  <div class="card"><h2>Clock-ins to check</h2><div class="sub">Compare the selfie with the person's first photo (saved automatically from their first clock-in). Rejected clock-ins count as absent.</div>
+  ${C.length?C.map(x=>`<div class="item"><div class="pics">${x.ph?`<figure><img class="s" src="${x.ph}" alt="Selfie"><figcaption>Selfie ${x.date.slice(5)} ${x.in||''}</figcaption></figure>`:''}<figure>${x.ref?`<img class="s" src="${x.ref}" alt="Profile photo">`:'<div class="noref">No profile photo yet</div>'}<figcaption>First photo (profile)</figcaption></figure></div>
+  <div class="g"><b>${esc(x.name)}</b><div class="sub">${fmt(x.date)} · in ${x.in||'-'}${x.out?' · out '+x.out:''}${x.place?' · '+esc(x.place):''}</div><div class="why">${(x.fl||[]).map(f=>atr(WHY[f]||f)).join(' · ')}</div>
+  ${(x.fl||[]).includes('no_clock_out')?`<label class="f">Clock-out time (optional)</label><input type="time" data-t="${x.key}" style="width:auto">`:''}
+  <div class="acts"><button class="btn ok" data-k="${x.key}" data-d="approved">Approve</button><button class="btn no" data-k="${x.key}" data-d="rejected">Reject</button>${x.ph?`<button class="btn s" data-ref="${x.key}">Replace profile photo with this selfie</button>`:''}</div></div></div>`).join(''):'<div class="sub" style="margin-top:8px">Nothing to check.</div>'}</div>`;
+  document.querySelectorAll('[data-sw]').forEach(bt=>bt.onclick=async()=>{bt.disabled=true;const r=await post('/api/admin/requests',{kind:'swap',uid:bt.dataset.sw,decision:bt.dataset.d});if(!r.ok){$('#se-'+bt.dataset.sw).textContent=r.j.error;bt.disabled=false;return}rev()});
+  document.querySelectorAll('[data-lv]').forEach(bt=>bt.onclick=async()=>{bt.disabled=true;await post('/api/admin/requests',{kind:'leave',uid:bt.dataset.lv,decision:bt.dataset.d});rev()});
+  document.querySelectorAll('[data-k]').forEach(bt=>bt.onclick=async()=>{bt.disabled=true;await post('/api/admin/review',{key:bt.dataset.k,decision:bt.dataset.d,out:(document.querySelector(`[data-t="${bt.dataset.k}"]`)||{}).value});rev()});
+  document.querySelectorAll('[data-ref]').forEach(bt=>bt.onclick=async()=>{bt.disabled=true;const r=await post('/api/admin/review',{action:'ref',key:bt.dataset.ref});if(!r.ok)alert(r.j.error);rev()});
+}
+
+// ---------- Today ----------
+async function day(d){
+  const{j}=await api('/api/admin/attendance'+(d?'?date='+d:''));
+  $('#v').innerHTML=`<div class="card"><h2>Attendance</h2><input type="date" id="dd" value="${j.date}" style="width:auto"><div class="scroll"><table><tr><th></th><th>Name</th><th>Place</th><th>Shift</th><th>In</th><th>Out</th><th>Worked</th><th>After shift end</th><th>Late</th><th>Status</th></tr>${j.rows.map(r=>`<tr><td>${r.ph?`<img class="s" style="width:64px" src="${r.ph}" alt="">`:''}</td><td>${esc(r.name)}</td><td>${esc(r.place||'-')}</td><td>${esc(r.code||'-')}</td><td>${r.in||'-'}</td><td>${r.out||'-'}${r.auto?' (auto)':''}${r.early?` <span class="chip warn">${r.early} min early</span>`:''}${r.in?` <button class="btn s" data-eo="${r.id}">Set</button>`:''}</td><td>${r.worked?`${Math.floor(r.worked/60)}h ${String(r.worked%60).padStart(2,'0')}m${r.worked>j.maxHours*60?` <span class="chip warn" title="Only ${j.maxHours} h a day are paid. Add overtime if you approve the extra time.">over ${j.maxHours} h</span>`:''}`:'-'}</td><td>${r.over?'+'+r.over+' min':'-'}</td><td>${r.late?r.late+' min':'-'}</td><td>${r.in&&!r.out&&j.date<j.today?'<span class="chip bad">no clock-out</span>':r.status==='ok'||r.status==='approved'?`<span class="chip ok">${r.status}</span>`:r.status?`<span class="chip warn">${r.status}</span>`:(r.code&&r.code!=='OFF'?'<span class="chip">not yet</span>':'')}</td></tr>`).join('')}</table></div></div>`;
+  $('#dd').onchange=()=>day($('#dd').value);
+  document.querySelectorAll('[data-eo]').forEach(b=>b.onclick=async()=>{const v=prompt('Clock-out time (24-hour, for example 16:00)');if(!v)return;const r=await post('/api/admin/attendance',{date:j.date,id:b.dataset.eo,out:v.trim()});if(!r.ok){alert(r.j.error);return}day(j.date)});
+}
+
+// ---------- Schedule ----------
+function iso(v){if(typeof v==='number')return new Date(Math.round((v-25569)*864e5)).toISOString().slice(0,10);v=String(v).trim();let m=v.match(/^\d{4}-\d{2}-\d{2}/);if(m)return m[0];m=v.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);return m?`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`:null}
+let rows=[];
+async function sch(){
+  $('#v').innerHTML=`<div class="card"><h2>Import weekly schedule</h2><div class="sub">Excel (.xlsx) or CSV. Column A = Name, B = PIN (leave a PIN cell empty to keep that person's current PIN). Optional columns: "Phone" (WhatsApp number), "Login name" (what the person types to sign in), "Location" (a restaurant name from Setup, several names separated by a comma, or ALL). Then one column per date with a shift code (OFF for days off). See schedule-template.csv.</div><input type="file" id="f" accept=".xlsx,.xls,.csv"><div id="pv"></div></div><div class="card" id="lvc"></div>`;
+  loadLeave();
+  $('#f').onchange=async e=>{
+    const f=e.target.files[0];if(!f)return;
+    const cfg=(await api('/api/admin/config')).j,shifts=cfg.shifts||{},offs=cfg.offices||[];
+    const wb=XLSX.read(await f.arrayBuffer(),{type:'array'}),g=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''});
+    const cols=[],errs=[];let lc=-1,gc=-1,pc=-1;
+    const byKey=Object.fromEntries(Object.keys(shifts).map(k=>[k.trim().replace(/\s+/g,' ').toLowerCase(),k]));
+    (g[0]||[]).forEach((h,i)=>{if(i<2||String(h).trim()==='')return;const t=String(h).trim().toLowerCase();if(t==='location'||t==='lokasi'){lc=i;return}if(['login name','login','username','nama login'].includes(t)){gc=i;return}if(['phone','whatsapp','no hp','nomor hp','no. hp','hp','telepon','no wa','wa'].includes(t)){pc=i;return}const d=iso(h);if(d)cols.push({i,d});else errs.push(`Column ${i+1} header is not a date`)});
+    rows=g.slice(1).filter(r=>String(r[0]).trim()).map(r=>{let pin=String(r[1]).trim();if(/^\d+$/.test(pin))pin=pin.padStart(4,'0');const days={};cols.forEach(c=>{const v=String(r[c.i]).trim().replace(/\s+/g,' ')||'OFF',k=v.toLowerCase();days[c.d]=k==='off'?'OFF':(byKey[k]||v)});const row={name:String(r[0]).trim(),pin,days};if(lc>=0)row.loc=String(r[lc]).trim();if(gc>=0)row.login=String(r[gc]).trim();if(pc>=0)row.phone=String(r[pc]).trim();return row});
+    rows.forEach(r=>{Object.entries(r.days).forEach(([d,c])=>{if(c!=='OFF'&&!shifts[c])errs.push(`${r.name} on ${d}: unknown code "${c}"`)});if(r.loc!==undefined){const ps=splitLoc(r.loc),all=ps.length===1&&['all','semua'].includes(ps[0].toLowerCase()),bad=all?[]:ps.filter(p=>!offs.some(o=>o.id===slug(p)));if(bad.length)errs.push(`${r.name}: unknown location "${bad[0]}"`)}});
+    const ds=cols.map(c=>c.d);
+    $('#pv').innerHTML=`<p>Preview: ${rows.length} employees, ${ds.length} days</p>${errs.length?`<div class="errs">${errs.slice(0,12).map(esc).join('<br>')}<br>Fix the file and choose it again.</div>`:''}<div class="scroll"><table><tr><th>Name</th>${gc>=0?'<th>Login name</th>':''}${pc>=0?'<th>WhatsApp</th>':''}${lc>=0?'<th>Location</th>':''}${ds.map(d=>`<th>${d.slice(5)}</th>`).join('')}</tr>${rows.map(r=>`<tr><td>${esc(r.name)}</td>${gc>=0?`<td>${esc(r.login||'')}</td>`:''}${pc>=0?`<td>${esc(r.phone||'')}</td>`:''}${lc>=0?`<td>${esc(r.loc||'ALL')}</td>`:''}${ds.map(d=>`<td>${esc(r.days[d])}</td>`).join('')}</tr>`).join('')}</table></div><div class="acts"><button class="btn p" id="imp" ${errs.length||!rows.length?'disabled':''}>Import</button></div><div id="res"></div>`;
+    $('#imp').onclick=async()=>{const{ok,j}=await post('/api/admin/schedule',{rows});$('#res').innerHTML=ok?msgOk(`Imported ${j.employees} employees, ${j.days} shifts.`):`<div class="errs">${(j.errors||[j.error]).map(esc).join('<br>')}</div>`}
+  };
+}
+async function loadLeave(ym){
+  ym=ym||ymd(new Date()).slice(0,7);
+  const{ok,j}=await api('/api/admin/leave?month='+ym);if(!ok)return;
+  const rws=j.list.flatMap(e=>e.days.map(d=>({id:e.id,name:e.name,d}))).sort((a,b)=>a.d.localeCompare(b.d));
+  $('#lvc').innerHTML=`<h2>Annual leave (paid)</h2><div class="sub">Add leave directly here, or approve employees' requests in Review. A leave day keeps the scheduled shift but is paid as normal.</div>
+  <label class="f">Employee</label><select id="le">${j.list.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('')}</select>
+  <div class="grid2"><div><label class="f">From</label><input type="date" id="lf" value="${ym}-01"></div><div><label class="f">To</label><input type="date" id="lto" value="${ym}-01"></div></div>
+  <div class="acts"><button class="btn p" id="la">Add leave</button></div><div id="lmsg2"></div>
+  <label class="f">Showing month</label><input type="month" id="lmm" value="${ym}" style="width:auto">
+  <div class="scroll"><table><tr><th>Date</th><th>Name</th><th></th></tr>${rws.map(x=>`<tr><td>${fmt(x.d)}</td><td>${esc(x.name)}</td><td><button class="btn no s" data-ld="${x.d}" data-li="${x.id}">Remove</button></td></tr>`).join('')||'<tr><td colspan="3" class="sub">No leave this month.</td></tr>'}</table></div>`;
+  $('#lmm').onchange=()=>loadLeave($('#lmm').value);
+  $('#la').onclick=async()=>{
+    const r=await post('/api/admin/leave',{action:'add',id:$('#le').value,from:$('#lf').value,to:$('#lto').value});
+    if(!r.ok){$('#lmsg2').innerHTML=msgErr(r.j.error);return}
+    await loadLeave(ym);$('#lmsg2').innerHTML=msgOk(`Added ${r.j.days} day(s). ${r.j.shifts} of them have a scheduled shift.`);
+  };
+  document.querySelectorAll('[data-ld]').forEach(b=>b.onclick=async()=>{await post('/api/admin/leave',{action:'remove',id:b.dataset.li,date:b.dataset.ld});loadLeave(ym)});
+}
+
+// ---------- Payroll ----------
+const num=v=>typeof v==='number'?Math.round(v):(Number(String(v).replace(/[^\d]/g,''))||0);
+const ptype=v=>{const s=String(v).trim().toLowerCase();return /hour|jam/.test(s)?'hourly':/day|daily|hari/.test(s)?'daily':/month|bulan/.test(s)?'monthly':null};
+let lastPay=null;
+async function pay(){
+  const n=new Date(),p=new Date(n.getFullYear(),n.getMonth()-1,1),m0=`${p.getFullYear()}-${String(p.getMonth()+1).padStart(2,'0')}`;
+  $('#v').innerHTML=`
+  <div class="card"><h2>Monthly payslips</h2><div class="sub">Every payslip starts as a Draft. Check it with View, tick the people and press Verify. Only verified payslips can be downloaded or sent on WhatsApp. If something changes later (overtime, kasbon, leave, an attendance fix), the payslip shows Changed and must be verified again. People with clock-ins still in Review cannot be verified.</div>
+  <div class="acts"><input type="month" id="pm" value="${m0}" style="width:auto;margin:0"><button class="btn" id="xl">Download Excel (attendance + payroll)</button></div><div id="pr"></div></div>
+  <div class="card" id="pdc"></div>
+  <div class="grid2"><div class="card" id="otc"></div><div class="card" id="kbc"></div></div>
+  <div class="grid2" style="margin-top:14px">
+  <div class="card"><h2>Salary data</h2><div class="sub">Excel or CSV with columns: Name, Pay type (Monthly, Daily or Hourly), Rate, and Paid (Weekly or Monthly, optional). Monthly: the monthly salary. Daily (Harian): the pay for one day worked, any shift length. Hourly: the pay per hour. Weekly-paid staff get payslips from Period payslips. See salary-template.csv.</div><input type="file" id="sf" accept=".xlsx,.xls,.csv"><div id="spv"></div></div>
+  <div class="card"><h2>Late deduction and work hours</h2><label class="f">Max paid hours per day</label><input id="mxh" inputmode="decimal"><div class="sub">A longer shift is paid only up to this many hours (hourly and monthly pay). Anything more is paid only as overtime that you add. Daily pay is always one full day.</div><h3>Late deduction</h3><div class="sub">Deducted for each late clock-in, by minutes after the shift starts.</div>
+  <label class="f" style="display:flex;align-items:center"><input type="checkbox" id="lo">Deduct for late clock-ins</label>
+  <label class="f">Tolerance in minutes</label><input id="lt" inputmode="numeric">
+  <div class="grid2"><div><label class="f">Level 1 deduction (Rp)</label><input id="a1" inputmode="numeric"></div><div></div>
+  <div><label class="f">Level 2 from (minutes)</label><input id="f2" inputmode="numeric"></div><div><label class="f">Level 2 deduction (Rp)</label><input id="a2" inputmode="numeric"></div>
+  <div><label class="f">Level 3 from (minutes)</label><input id="f3" inputmode="numeric"></div><div><label class="f">Level 3 deduction (Rp)</label><input id="a3" inputmode="numeric"></div></div>
+  <div class="acts"><button class="btn p" id="ls">Save rules</button></div><div id="lmsg"></div></div></div>
+  <div class="card" style="margin-top:14px"><h2>WhatsApp message (free, one tap)</h2><div class="sub">Used when you press WhatsApp on a verified payslip. Use {name}, {period} and {link}. {link} is the person's private payslip link: it opens their payslip with a Download PDF button and stops working after 45 days, or as soon as you un-verify the payslip or it changes. If you leave {link} out, it is added at the end. Do not put salary amounts in the message.</div><textarea id="wat" rows="3"></textarea><div class="acts"><button class="btn p" id="wsv">Save message</button></div><div id="wmsg"></div></div>`;
+  let prow=[];
+  $('#sf').onchange=async e=>{
+    const f=e.target.files[0];if(!f)return;
+    const wb=XLSX.read(await f.arrayBuffer(),{type:'array'}),g=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''});
+    prow=g.slice(1).filter(r=>String(r[0]).trim()).map(r=>({name:String(r[0]).trim(),type:ptype(r[1]),rate:num(r[2]),freq:/week|minggu/i.test(String(r[3]||''))?'weekly':'monthly'}));
+    const bad=prow.filter(r=>!r.type||!r.rate).map(r=>r.name);
+    $('#spv').innerHTML=`<p>Preview: ${prow.length} employees</p>${bad.length?`<div class="errs">Check the pay type (Monthly, Daily or Hourly) and rate for: ${bad.slice(0,10).map(esc).join(', ')}</div>`:''}<div class="scroll"><table><tr><th>Name</th><th>Pay type</th><th class="n">Rate</th><th>Paid</th></tr>${prow.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.type||'?'}</td><td class="n">${rpf(r.rate)}${({hourly:' / hour',monthly:' / month',daily:' / day'})[r.type]||''}</td><td>${r.freq}</td></tr>`).join('')}</table></div><div class="acts"><button class="btn p" id="simp" ${prow.length&&!bad.length?'':'disabled'}>Import salary data</button></div><div id="sres"></div>`;
+    $('#simp').onclick=async()=>{const{ok,j}=await post('/api/admin/paydata',{rows:prow});$('#sres').innerHTML=ok?msgOk(`Saved pay rates for ${j.employees} employees.`):`<div class="errs">${(j.errors||[j.error]).map(esc).join('<br>')}</div>`;if(ok)loadPay()};
+  };
+  $('#pm').onchange=()=>loadPay();
+  $('#xl').onclick=exportXlsx;
+  $('#wsv').onclick=async()=>{const r=await post('/api/admin/payroll',{action:'settings',waTemplate:$('#wat').value});$('#wmsg').innerHTML=r.ok?msgOk('Saved.'):msgErr(r.j.error)};
+  $('#ls').onclick=async()=>{
+    const v=id=>parseInt($('#'+id).value)||0;
+    const{ok,j}=await post('/api/admin/payroll',{action:'settings',maxHours:$('#mxh').value,lateOn:$('#lo').checked,tolerance:v('lt'),a1:v('a1'),from2:v('f2'),a2:v('a2'),from3:v('f3'),a3:v('a3')});
+    $('#lmsg').innerHTML=ok?msgOk('Saved.'):msgErr(j.error);if(ok)loadPay();
+  };
+  const cur=ymd(new Date()).slice(0,7);
+  await loadPay();loadPeriodUi();loadOt(cur);loadKb(cur);
+}
+const sel=box=>[...document.querySelectorAll(`#${box} [data-pid]:checked`)].map(c=>c.dataset.pid);
+const tickAll=box=>`<input type="checkbox" data-all="${box}" aria-label="Tick all">`;
+document.addEventListener('change',e=>{const a=e.target.closest('[data-all]');if(a)document.querySelectorAll(`#${a.dataset.all} [data-pid]`).forEach(c=>{c.checked=a.checked})});
+function slipTable(box,rws,keyOf,tag,per,tpl,why){
+  const t=rws.filter(r=>!r.skip),sum=k=>t.reduce((a,r)=>a+r[k],0);
+  return `<div class="scroll"><table><tr><th>${tickAll(box)}</th><th>Name</th><th>Pay</th><th class="n">Hours</th><th class="n">Overtime</th><th class="n">Late</th><th class="n">Kasbon</th><th class="n">Take-home</th><th>Status</th><th></th></tr>${rws.map(r=>r.skip?`<tr><td></td><td>${esc(r.name)}</td><td colspan="8" class="sub">${why[r.skip]||r.skip}</td></tr>`:
+  `<tr><td><input type="checkbox" data-pid="${r.id}" ${r.freq==='weekly'&&box==='pdc'?'checked':''}></td><td>${esc(r.name)}${r.warn.length?` <span class="why" title="${esc(r.warn.join('; '))}">⚠</span>`:''}</td><td>${r.type}${r.freq==='weekly'?' · weekly':''}</td><td class="n">${r.type==='daily'?`${r.aDays+r.leaveDays}/${r.sDays} days`:`${r.aHrs}/${r.sHrs}`}${r.leaveDays?` (${r.leaveDays} leave)`:''}</td><td class="n">${r.otPay?rpf(r.otPay):'-'}</td><td class="n">${r.lateDed?rpf(r.lateDed):'-'}</td><td class="n">${r.kb?rpf(r.kb):'-'}</td><td class="n"><b>${rpf(r.net)}</b></td><td>${stateChip(r)}</td><td><button class="btn s" data-sv="${keyOf(r)}">View</button> ${r.state==='verified'?waLink(r,tag,per,tpl):''}</td></tr>`).join('')}
+  <tr><td></td><td><b>Total (${t.length})</b></td><td></td><td></td><td class="n">${rpf(sum('otPay'))}</td><td class="n">${rpf(sum('lateDed'))}</td><td class="n">${rpf(sum('kb'))}</td><td class="n"><b>${rpf(sum('net'))}</b></td><td></td><td></td></tr></table></div>
+  ${t.some(r=>r.warn.length)?`<div class="sub" style="margin-top:6px">⚠ ${t.filter(r=>r.warn.length).map(r=>esc(r.name+': '+r.warn.join('; '))).join(' · ')}</div>`:''}`;
+}
+async function verifyAct(box,url,body,action,msgBox,reload){
+  const ids=sel(box);if(!ids.length){$(msgBox).innerHTML=msgErr('Tick at least one person.');return}
+  if(action==='unverify'&&!confirm(`Un-verify ${ids.length} payslip(s)? They go back to Draft.`))return;
+  const r=await post(url,{...body,action,ids});
+  if(!r.ok){$(msgBox).innerHTML=msgErr(r.j.error);return}
+  await reload();
+  $(msgBox).innerHTML=msgOk(action==='verify'?`Verified ${r.j.count} payslip(s).`:`${r.j.count} payslip(s) back to Draft.`)+(r.j.skipped&&r.j.skipped.length?msgErr('Not verified: '+r.j.skipped.join('; ')):'');
+}
+async function loadPay(){
+  const ym=$('#pm').value;if(!ym)return;
+  const{ok,j}=await api('/api/admin/payroll?month='+ym);
+  if(!ok){$('#pr').innerHTML=msgErr(j.error);return}
+  lastPay=j;
+  const s=j.settings,editing=document.activeElement&&['mxh','lt','a1','f2','a2','f3','a3'].includes(document.activeElement.id);
+  if(document.activeElement.id!=='wat')$('#wat').value=j.wa;
+  if(!editing){$('#mxh').value=s.maxHours;$('#lo').checked=s.on;$('#lt').value=s.tol;$('#a1').value=s.a1;$('#f2').value=s.from2;$('#a2').value=s.a2;$('#f3').value=s.from3;$('#a3').value=s.a3}
+  const per=new Date(ym+'-01T00:00:00').toLocaleDateString('id-ID',{month:'long',year:'numeric'});
+  j.rows.forEach(r=>{if(!r.skip)slipStore.set('m:'+ym+':'+r.id,{s:r,tag:ym,per,tpl:j.wa})});
+  $('#pr').innerHTML=`${j.pending?msgErr(`${j.pending} clock-in(s) this month are still in Review. Until you reject them they count as present.`):''}${j.ended?'':'<div class="errs">This month has not finished yet, so this is a preview. Verify after the month ends, or use Period payslips for pay up to today.</div>'}
+  ${slipTable('pr',j.rows,r=>'m:'+ym+':'+r.id,ym,per,j.wa,{no_pay_data:'No pay rate yet',weekly:'Paid weekly: use Period payslips below',no_schedule:'No schedule this month'})}
+  <div class="acts"><button class="btn p" id="pv1" ${j.ended?'':'disabled'}>Verify selected</button><button class="btn no" id="pu1">Un-verify selected</button></div><div id="fm"></div>`;
+  $('#pv1').onclick=()=>verifyAct('pr','/api/admin/payroll',{month:ym},'verify','#fm',loadPay);
+  $('#pu1').onclick=()=>verifyAct('pr','/api/admin/payroll',{month:ym},'unverify','#fm',loadPay);
+}
+async function loadPeriodUi(from,to){
+  const n=new Date();to=to||ymd(n);from=from||ymd(new Date(n.getFullYear(),n.getMonth(),n.getDate()-6));
+  const head=`<h2>Period payslips (weekly, or up to today)</h2><div class="sub">For staff paid weekly, or to see pay for the month so far. Days after today are ignored. Monthly-paid staff can be included when the dates stay inside one month. Same rule: verify before sending.</div><div class="acts"><label class="sub">From <input type="date" id="pf" value="${from}" style="width:auto"></label><label class="sub">To <input type="date" id="pt" value="${to}" style="width:auto"></label></div>`;
+  const bind=()=>{$('#pf').onchange=$('#pt').onchange=()=>loadPeriodUi($('#pf').value,$('#pt').value)};
+  const{ok,j}=await api(`/api/admin/period?from=${from}&to=${to}`);
+  if(!ok){$('#pdc').innerHTML=head+msgErr(j.error);bind();return}
+  const f=d=>new Date(d+'T00:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short'}),perTxt=`${f(from)} – ${f(to)} ${to.slice(0,4)}`,tag=from+'_'+to;
+  j.rows.forEach(r=>{if(!r.skip)slipStore.set(`p:${tag}:${r.id}`,{s:r,tag,per:perTxt,tpl:j.wa})});
+  $('#pdc').innerHTML=head+slipTable('pdc',j.rows,r=>`p:${tag}:${r.id}`,tag,perTxt,j.wa,{no_pay_data:'No pay rate yet',no_schedule:'No scheduled shifts in this period',cross_month:'Monthly pay: choose dates inside one month'})+
+  `<div class="sub" style="margin:8px 0">Weekly-paid staff are ticked automatically.</div><div class="acts"><button class="btn p" id="pc">Verify selected</button><button class="btn no" id="prm">Un-verify selected</button></div><div id="pm2"></div>`;
+  bind();
+  $('#pc').onclick=()=>verifyAct('pdc','/api/admin/period',{from,to},'verify','#pm2',()=>loadPeriodUi(from,to));
+  $('#prm').onclick=()=>verifyAct('pdc','/api/admin/period',{from,to},'unverify','#pm2',()=>loadPeriodUi(from,to));
+}
+const refreshSlips=()=>{loadPay();if($('#pf'))loadPeriodUi($('#pf').value,$('#pt').value)};
+async function loadOt(ym){
+  const{ok,j}=await api('/api/admin/overtime?month='+ym);if(!ok)return;
+  const rws=j.list.flatMap(e=>e.entries.map(x=>({...x,id:e.id,name:e.name}))).sort((a,b)=>a.date.localeCompare(b.date));
+  $('#otc').innerHTML=`<h2>Overtime</h2><div class="sub">Added by HR only. Pay = hours × the overtime rate. The Today tab shows how long after the shift end someone clocked out, as a hint.</div><label class="f">Showing month</label><input type="month" id="omm" value="${ym}" style="width:auto">
+  <select id="oe">${j.list.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('')}</select>
+  <div class="grid2"><input type="date" id="od" value="${ymd(new Date()).startsWith(ym)?ymd(new Date()):ym+'-01'}"><input id="oh" inputmode="decimal" placeholder="Hours, e.g. 2.5"></div><input id="on" placeholder="Note (optional)">
+  <div class="acts"><button class="btn p" id="oa">Add overtime</button></div><div id="om2"></div>
+  <div class="scroll" style="margin-top:10px"><table style="min-width:420px"><tr><th>Date</th><th>Name</th><th class="n">Hours</th><th class="n">Amount</th><th></th></tr>${rws.map(x=>`<tr><td>${sFmt(x.date)}</td><td>${esc(x.name)}${x.note?`<div class="sub">${esc(x.note)}</div>`:''}</td><td class="n">${x.hours}</td><td class="n">${rpf(x.amount)}</td><td><button class="btn no s" data-ou="${x.uid}" data-oi="${x.id}">Delete</button></td></tr>`).join('')||'<tr><td colspan="5" class="sub">No overtime this month.</td></tr>'}</table></div>
+  <div class="acts"><span class="sub">Rate per hour (Rp)</span><input id="dr" inputmode="numeric" style="width:110px;margin:0" value="${j.rule.rate}"><button class="btn s" id="ods">Save rate</button></div>`;
+  $('#omm').onchange=()=>loadOt($('#omm').value);
+  $('#oa').onclick=async()=>{const r=await post('/api/admin/overtime',{action:'add',id:$('#oe').value,date:$('#od').value,hours:$('#oh').value,note:$('#on').value});if(!r.ok){$('#om2').innerHTML=msgErr(r.j.error);return}loadOt($('#od').value.slice(0,7));refreshSlips()};
+  document.querySelectorAll('[data-ou]').forEach(b=>b.onclick=async()=>{await post('/api/admin/overtime',{action:'delete',month:ym,id:b.dataset.oi,uid:b.dataset.ou});loadOt(ym);refreshSlips()});
+  $('#ods').onclick=async()=>{await post('/api/admin/payroll',{action:'settings',otRate:$('#dr').value});loadOt(ym);refreshSlips()};
+}
+async function loadKb(ym){
+  const{ok,j}=await api('/api/admin/kasbon?month='+ym);if(!ok)return;
+  const rws=j.list.flatMap(e=>e.entries.map(x=>({...x,id:e.id,name:e.name}))).sort((a,b)=>a.date.localeCompare(b.date));
+  $('#kbc').innerHTML=`<h2>Kasbon (cash advance)</h2><div class="sub">Taken off the payslip that includes its date. It never takes pay below zero; anything left over is shown as a warning so you can add it again next period.</div><label class="f">Showing month</label><input type="month" id="kmm" value="${ym}" style="width:auto">
+  <select id="ke">${j.list.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('')}</select>
+  <div class="grid2"><input type="date" id="kd" value="${ymd(new Date()).startsWith(ym)?ymd(new Date()):ym+'-01'}"><input id="ka" inputmode="numeric" placeholder="Amount (Rp), e.g. 200000"></div><input id="kn" placeholder="Note (optional)">
+  <div class="acts"><button class="btn p" id="kadd">Add kasbon</button></div><div id="km"></div>
+  <div class="scroll" style="margin-top:10px"><table style="min-width:420px"><tr><th>Date</th><th>Name</th><th class="n">Amount</th><th></th></tr>${rws.map(x=>`<tr><td>${sFmt(x.date)}</td><td>${esc(x.name)}${x.note?`<div class="sub">${esc(x.note)}</div>`:''}</td><td class="n">${rpf(x.amount)}</td><td><button class="btn no s" data-ku="${x.uid}" data-ki="${x.id}">Delete</button></td></tr>`).join('')||'<tr><td colspan="4" class="sub">No kasbon this month.</td></tr>'}</table></div>`;
+  $('#kmm').onchange=()=>loadKb($('#kmm').value);
+  $('#kadd').onclick=async()=>{const r=await post('/api/admin/kasbon',{action:'add',id:$('#ke').value,date:$('#kd').value,amount:$('#ka').value,note:$('#kn').value});if(!r.ok){$('#km').innerHTML=msgErr(r.j.error);return}loadKb($('#kd').value.slice(0,7));refreshSlips()};
+  document.querySelectorAll('[data-ku]').forEach(b=>b.onclick=async()=>{if(!confirm('Delete this kasbon?'))return;await post('/api/admin/kasbon',{action:'delete',month:ym,id:b.dataset.ki,uid:b.dataset.ku});loadKb(ym);refreshSlips()});
+}
+async function exportXlsx(){
+  const ym=$('#pm').value;if(!ym)return;
+  $('#xl').disabled=true;
+  try{
+    const[{j:a},{j:p},{j:o},{j:k}]=await Promise.all([api('/api/admin/export?month='+ym),api('/api/admin/payroll?month='+ym),api('/api/admin/overtime?month='+ym),api('/api/admin/kasbon?month='+ym)]);
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(a.rows.map(r=>({Date:r.date,Name:r.name,Shift:r.shift,'Clock in':r.in,'Clock out':r.out+(r.outBy==='auto'?' (auto)':r.outBy==='hr'?' (HR)':''),'Late (min)':r.late||'',Place:r.place,Status:r.status,Flags:r.flags}))),'Attendance');
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(p.rows.map(r=>r.skip?{Name:r.name,Note:r.skip}:{Name:r.name,'Pay type':r.type,'Rate':r.rate,'Scheduled days':r.sDays,'Days worked':r.aDays,'Leave days':r.leaveDays,'Absent days':r.absent,'Hours paid':r.aHrs,'Gross':r.gross,'Overtime':r.otPay,'Late deduction':r.lateDed,'Kasbon':r.kb,'Take-home':r.net,'Status':r.pend?'in review':r.state,'Verified by':r.ver?r.ver.by:''})),'Payroll');
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(o.list.flatMap(e=>e.entries.map(x=>({Date:x.date,Name:e.name,Hours:x.hours,Amount:x.amount,Note:x.note||''})))),'Overtime');
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(k.list.flatMap(e=>e.entries.map(x=>({Date:x.date,Name:e.name,Amount:x.amount,Note:x.note||'',By:x.by||''})))),'Kasbon');
+    XLSX.writeFile(wb,`Kurogi_absen_${ym}.xlsx`);
+  }finally{$('#xl').disabled=false}
+}
+
+// ---------- Setup ----------
+async function loadEmps(msg){
+  const{ok,j}=await api('/api/admin/employees');if(!ok)return;
+  const row=(e,btns)=>`<tr><td>${esc(e.name)}</td><td>${esc(e.login||'-')}</td><td>${esc(e.loc)}</td><td>${esc(e.pay||'-')}</td><td>${esc(e.phone||'-')}</td><td>${btns}</td></tr>`;
+  const head='<tr><th>Payroll name</th><th>Login</th><th>Location</th><th>Pay</th><th>WhatsApp</th><th></th></tr>';
+  $('#emc').innerHTML=`<h2>Employees</h2><div class="sub">PIN: set a new PIN (this also unlocks someone after 5 wrong tries). PINs are stored scrambled, so nobody can read them, not even admins. Remove: the person can no longer sign in; history is kept and you can restore them. Delete permanently erases everything and cannot be undone.</div>
+  <div class="scroll"><table>${head}${j.active.map(e=>row(e,`<button class="btn s" data-epin="${e.id}" data-n="${esc(e.name)}">PIN</button> <button class="btn s" data-ep="${e.id}" data-n="${esc(e.name)}" data-pn="${esc(e.phone||'')}">Phone</button> <button class="btn no s" data-ea="${e.id}" data-n="${esc(e.name)}">Remove</button>`)).join('')||'<tr><td colspan="6" class="sub">No employees yet.</td></tr>'}</table></div>
+  ${j.archived.length?`<h3>Removed employees</h3><div class="scroll"><table>${head}${j.archived.map(e=>row(e,`<button class="btn s" data-er="${e.id}">Restore</button> <button class="btn no s" data-ed="${e.id}" data-n="${esc(e.name)}">Delete permanently</button>`)).join('')}</table></div>`:''}<div id="emsg">${msg||''}</div>`;
+  const go=async(action,id,confirmText,okMsg,extra={})=>{const r=await post('/api/admin/employees',{action,id,confirm:confirmText,...extra});loadEmps(r.ok?msgOk(okMsg+(r.j.loginDropped?' Their login name was taken by someone else, so they sign in with their payroll name until you import a new login name.':'')):msgErr(r.j.error))};
+  document.querySelectorAll('[data-epin]').forEach(b=>b.onclick=()=>{const v=prompt(`New 4-digit PIN for ${b.dataset.n}:`);if(v)go('pin',b.dataset.epin,'','New PIN saved. Tell the person their new PIN.',{pin:v.trim()})});
+  document.querySelectorAll('[data-ep]').forEach(b=>b.onclick=()=>{const v=prompt(`WhatsApp number for ${b.dataset.n} (for example 0812 3456 7890). Leave empty to remove it.`,b.dataset.pn);if(v!==null)go('phone',b.dataset.ep,'','Saved.',{phone:v})});
+  document.querySelectorAll('[data-ea]').forEach(b=>b.onclick=()=>{if(confirm(`Remove ${b.dataset.n}? They can no longer sign in and will leave schedules and payroll. Their history is kept.`))go('archive',b.dataset.ea,'','Removed.')});
+  document.querySelectorAll('[data-er]').forEach(b=>b.onclick=()=>go('restore',b.dataset.er,'','Restored.'));
+  document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{const t=prompt(`This permanently erases everything about ${b.dataset.n}: attendance, photos, leave, overtime, kasbon and payslips. It cannot be undone.\n\nType their payroll name to confirm:`);if(t)go('delete',b.dataset.ed,t,'Deleted permanently.')});
+}
+let offs=[];
+const kioskUrl=o=>`${location.origin}/qr.html?b=${encodeURIComponent(o.id)}&k=${encodeURIComponent(o.kkey)}&n=${encodeURIComponent(o.name)}`;
+function drawOffs(){
+  $('#ofs').innerHTML=offs.map((o,i)=>`<div class="card" style="margin:8px 0;background:var(--paper)"><label class="f">Name</label><input data-i="${i}" data-f="name" placeholder="e.g. Cabang A" value="${esc(o.name)}">
+  <div class="grid2"><div><label class="f">Latitude</label><input data-i="${i}" data-f="lat" value="${esc(o.lat)}"></div><div><label class="f">Longitude</label><input data-i="${i}" data-f="lng" value="${esc(o.lng)}"></div></div>
+  <label class="f">Allowed radius (metres)</label><input data-i="${i}" data-f="radius" value="${esc(o.radius??150)}">
+  <label class="f">Counter QR code (beta)</label><select data-i="${i}" data-f="qr"><option value="off">Off</option><option value="test">Test: clock-in without QR goes to Review</option><option value="on">On: QR required to clock in</option></select>
+  ${o.kkey&&o.qr!=='off'?`<div class="sub">Open this link on the counter tablet (keep it private):</div><div class="kl"><input readonly value="${esc(kioskUrl(o))}"><button class="btn s" data-cp="${i}">Copy</button></div><label class="sub" style="display:flex;align-items:center;margin-top:6px"><input type="checkbox" data-nk="${i}" ${o.newKey?'checked':''}>Make a new kiosk link when I save (the old link stops working)</label>`:''}
+  <div class="acts"><button class="btn s" data-h="${i}">Use my current location</button><button class="btn no s" data-x="${i}">Remove</button></div></div>`).join('')||'<div class="sub">No locations yet.</div>';
+  document.querySelectorAll('#ofs [data-f]').forEach(el=>{if(el.tagName==='SELECT')el.value=offs[el.dataset.i].qr||'off';el.oninput=el.onchange=()=>{offs[el.dataset.i][el.dataset.f]=el.value;if(el.dataset.f==='qr')drawOffs()}});
+  document.querySelectorAll('[data-nk]').forEach(el=>el.onchange=()=>{offs[el.dataset.nk].newKey=el.checked});
+  document.querySelectorAll('[data-cp]').forEach(b=>b.onclick=async()=>{const inp=b.previousElementSibling;try{await navigator.clipboard.writeText(inp.value);b.textContent='Copied'}catch(e){inp.select()}});
+  document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>navigator.geolocation.getCurrentPosition(p=>{const o=offs[b.dataset.h];o.lat=p.coords.latitude;o.lng=p.coords.longitude;drawOffs()},()=>{$('#sm').innerHTML=msgErr('Location is blocked in this browser.')},{enableHighAccuracy:true}));
+  document.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{offs.splice(b.dataset.x,1);drawOffs()});
+}
+async function set(){
+  const c=(await api('/api/admin/config')).j,sh=c.shifts||{M:{start:'07:00',end:'15:00'},Md:{start:'14:00',end:'22:00'},E:{start:'22:00',end:'06:00'}};
+  offs=(c.offices||[]).map(o=>({...o,qr:o.qr||'off'}));
+  $('#v').innerHTML=`<div class="grid2"><div class="card"><h2>Shift codes</h2><div class="sub">One per line: code,start,end. OFF is built in.</div><textarea id="sh" rows="8">${esc(Object.entries(sh).map(([k,v])=>`${k},${v.start},${v.end}`).join('\n'))}</textarea>
+  <h3>Restaurant locations</h3><div class="sub">Stand inside each restaurant and press "Use my current location". Don't rename a location after assigning staff to it.</div><div id="ofs"></div>
+  <div class="acts"><button class="btn" id="addo">+ Add location</button><button class="btn p" id="save">Save shift codes and locations</button></div><div id="sm"></div></div>
+  <div><div class="card"><h2>Shift swap rules</h2><div class="sub">Employees can swap shifts with a colleague from the same restaurant. The colleague must accept first.</div>
+  <label class="f" style="display:flex;align-items:center"><input type="checkbox" id="swa" ${c.swap.auto?'':'checked'}>A manager must approve swaps after both agree</label>
+  <label class="f">Swaps close this many hours before the shift starts</label><input id="swh" inputmode="numeric" value="${c.swap.hours}">
+  <div class="acts"><button class="btn p" id="sws">Save swap rules</button></div><div id="swm"></div></div>
+  <div class="card" id="adc" hidden></div></div></div>
+  <div class="card" id="emc"></div><div class="card" id="auc"></div>`;
+  drawOffs();loadEmps();loadAudit();if(can('admins'))loadAdmins();
+  $('#addo').onclick=()=>{offs.push({name:'',lat:'',lng:'',radius:150,qr:'off'});drawOffs()};
+  $('#save').onclick=async()=>{
+    const s=$('#sh').value.split('\n').map(l=>l.split(',').map(x=>x.trim())).filter(a=>a[0]).map(([code,start,end])=>({code,start,end}));
+    const o=offs.filter(x=>String(x.name).trim()||String(x.lat).trim()).map(x=>({name:x.name,lat:parseFloat(x.lat),lng:parseFloat(x.lng),radius:parseInt(x.radius)||150,qr:x.qr||'off',newKey:!!x.newKey}));
+    const{ok,j}=await post('/api/admin/config',{shifts:s,offices:o});
+    if(!ok){$('#sm').innerHTML=msgErr(j.error);return}
+    await set();$('#sm').innerHTML=msgOk('Saved.')+(j.warn&&j.warn.length?`<div class="why">${j.warn.map(esc).join('<br>')}</div>`:'');
+  };
+  $('#sws').onclick=async()=>{const{ok,j}=await post('/api/admin/config',{swap:{auto:!$('#swa').checked,hours:$('#swh').value}});$('#swm').innerHTML=ok?msgOk('Saved.'):msgErr(j.error)};
+}
+async function loadAdmins(msg){
+  const{ok,j}=await api('/api/admin/admins');if(!ok)return;
+  const box=$('#adc');box.hidden=false;
+  box.innerHTML=`<h2>Admin accounts</h2><div class="sub">Give each HR person or manager their own login, so the activity log shows who did what. HR can do everything except manage admins. Manager can use Review, Today and Schedule only (no pay). You (owner) sign in with an empty username and the owner password.</div>
+  <div class="scroll"><table style="min-width:360px"><tr><th>Name</th><th>Username</th><th>Role</th><th></th></tr>${j.list.map(a=>`<tr><td>${esc(a.name)}${a.off?' <span class="chip bad">disabled</span>':''}</td><td>${esc(a.user)}</td><td>${ROLE[a.role]}</td><td><button class="btn s" data-ae="${esc(a.user)}">Edit</button> <button class="btn no s" data-ar="${esc(a.user)}">Remove</button></td></tr>`).join('')||'<tr><td colspan="4" class="sub">No admin accounts yet.</td></tr>'}</table></div>
+  <h3 id="aft">Add an admin</h3><div class="grid2"><div><label class="f">Name</label><input id="an"></div><div><label class="f">Username</label><input id="au" autocapitalize="none"></div>
+  <div><label class="f">Role</label><select id="ar"><option value="hr">HR</option><option value="manager">Manager</option></select></div><div><label class="f">Password (at least 8 characters)</label><input id="ap" type="password" autocomplete="new-password"></div></div>
+  <label class="f" style="display:flex;align-items:center"><input type="checkbox" id="ao">Disabled (cannot sign in)</label>
+  <div class="acts"><button class="btn p" id="asv">Save admin</button></div><div id="amsg">${msg||''}</div>`;
+  $('#asv').onclick=async()=>{const r=await post('/api/admin/admins',{action:'save',name:$('#an').value,user:$('#au').value,role:$('#ar').value,password:$('#ap').value,off:$('#ao').checked});loadAdmins(r.ok?msgOk('Saved.'):msgErr(r.j.error));loadAudit()};
+  document.querySelectorAll('[data-ae]').forEach(b=>b.onclick=()=>{const a=j.list.find(x=>x.user===b.dataset.ae);$('#aft').textContent='Edit '+a.name+' (leave password empty to keep it)';$('#an').value=a.name;$('#au').value=a.user;$('#au').readOnly=true;$('#ar').value=a.role;$('#ao').checked=a.off;$('#ap').value='';$('#an').focus()});
+  document.querySelectorAll('[data-ar]').forEach(b=>b.onclick=async()=>{if(!confirm('Remove admin '+b.dataset.ar+'?'))return;const r=await post('/api/admin/admins',{action:'remove',user:b.dataset.ar});loadAdmins(r.ok?msgOk('Removed.'):msgErr(r.j.error));loadAudit()});
+}
+async function loadAudit(){
+  const{ok,j}=await api('/api/admin/audit');if(!ok)return;
+  $('#auc').innerHTML=`<h2>Activity log</h2><div class="sub">The last 200 changes and sign-ins, newest first. Failed sign-ins appear here too.</div>
+  <div class="scroll" style="max-height:420px;overflow-y:auto"><table><tr><th>When</th><th>Who</th><th>What</th><th>Details</th></tr>${j.list.map(x=>`<tr><td>${when(x.at)}</td><td>${esc(x.by)}</td><td>${/Failed/.test(x.act)?`<span class="bad">${esc(x.act)}</span>`:esc(x.act)}</td><td style="white-space:normal;min-width:220px">${esc(x.detail)}</td></tr>`).join('')||'<tr><td colspan="4" class="sub">Nothing yet.</td></tr>'}</table></div>`;
+}
+</script></body></html>
